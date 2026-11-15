@@ -1,5 +1,5 @@
-// Quick settings: in-ear detection, low latency mode, spatial audio, find my
-// earbuds and firmware version.
+// Quick settings: in-ear detection, low latency mode, Personal Sound Profile,
+// spatial audio, find my earbuds and firmware version.
 //
 // Owns the `quick` slice of device state. The device passes in how to send
 // commands and how to publish state changes, and forwards incoming frames.
@@ -8,30 +8,49 @@ const {
   Command, Response,
   decodeInEar, encodeInEar, decodeLowLatency, encodeLowLatency,
   decodeFirmware, encodeRing, decodeSpatialAudio, encodeSpatialAudio,
+  decodePersonalSound, encodePersonalSound,
 } = require('./commands');
 const { ConfirmedSetting } = require('./confirmed-setting');
 
 const READ_GAP_MS = 150;
 const RING_AUTO_STOP_MS = 30_000;
 
-// On/off settings: how to read, write and decode each one.
+// On/off settings: how to read, write and decode each one for this model.
+// Each returns null when the model doesn't have the setting.
 const TOGGLES = {
-  inEar: {
+  inEar: (caps) => (caps.inEar ? {
     get: Command.GET_IN_EAR, set: Command.SET_IN_EAR, responses: Response.IN_EAR,
     decode: decodeInEar, encode: encodeInEar,
-  },
-  lowLatency: {
+  } : null),
+  lowLatency: (caps) => (caps.lowLatency ? {
     get: Command.GET_LOW_LATENCY, set: Command.SET_LOW_LATENCY, responses: Response.LOW_LATENCY,
     decode: decodeLowLatency, encode: encodeLowLatency,
+  } : null),
+  personalSound: (caps) => {
+    if (caps.personalSound === 'mimi') {
+      return {
+        get: Command.GET_MIMI, set: Command.SET_MIMI, responses: Response.MIMI,
+        decode: decodePersonalSound, encode: encodePersonalSound,
+      };
+    }
+    if (caps.personalSound === 'audiodo') {
+      return {
+        get: Command.GET_AUDIODO, set: Command.SET_AUDIODO, responses: Response.AUDIODO,
+        decode: decodePersonalSound, encode: encodePersonalSound,
+      };
+    }
+    return null;
   },
 };
+const TOGGLE_NAMES = Object.keys(TOGGLES);
 
 function initialQuickState() {
   return {
     inEar: null, // true/false once read; null if unknown or unsupported
     lowLatency: null,
+    personalSound: null,
     spatial: null, // spatial audio mode key ('off', 'fixed', …) once read
-    pending: { inEar: false, lowLatency: false, spatial: false },
+    pending: { inEar: false, lowLatency: false, personalSound: false, spatial: false },
     firmware: null,
     ringing: null, // 'left' | 'right' | 'all' while a find sound is playing
   };
@@ -45,12 +64,15 @@ class QuickSettings {
     this.capabilities = capabilities;
     this.ringTimer = null;
     this.ringSide = null;
-    this.pendingFlags = { inEar: false, lowLatency: false, spatial: false };
+    this.pendingFlags = { inEar: false, lowLatency: false, personalSound: false, spatial: false };
 
     this.confirm = {};
-    for (const [name, spec] of Object.entries(TOGGLES)) {
+    for (const name of TOGGLE_NAMES) {
       this.confirm[name] = new ConfirmedSetting({
-        read: () => this.send(spec.get),
+        read: () => {
+          const spec = this.#spec(name);
+          if (spec) this.send(spec.get);
+        },
         matches: (report, target) => report === target,
         onTimeout: () => this.#setPending(name, false),
       });
@@ -66,16 +88,19 @@ class QuickSettings {
   onConnected(startDelayMs = 0) {
     const caps = this.capabilities();
     const reads = [Command.GET_FIRMWARE];
-    if (caps.inEar) reads.push(Command.GET_IN_EAR);
-    if (caps.lowLatency) reads.push(Command.GET_LOW_LATENCY);
+    for (const name of TOGGLE_NAMES) {
+      const spec = this.#spec(name);
+      if (spec) reads.push(spec.get);
+    }
     if (caps.spatialModes.length) reads.push(Command.GET_SPATIAL_AUDIO);
     reads.forEach((command, i) => setTimeout(() => this.send(command), startDelayMs + i * READ_GAP_MS));
   }
 
   // Returns true if the frame belonged to quick settings.
   handle(frame) {
-    for (const [name, spec] of Object.entries(TOGGLES)) {
-      if (spec.responses.includes(frame.command)) {
+    for (const name of TOGGLE_NAMES) {
+      const spec = this.#spec(name);
+      if (spec?.responses.includes(frame.command)) {
         const value = spec.decode(frame.payload);
         if (this.confirm[name].accept(value)) {
           this.pendingFlags[name] = false;
@@ -99,10 +124,11 @@ class QuickSettings {
     return false;
   }
 
-  // name: 'inEar' | 'lowLatency'. Ignored while that setting is still switching.
+  // name: 'inEar' | 'lowLatency' | 'personalSound'. Ignored while that setting
+  // is still switching or the model doesn't have it.
   setToggle(name, on, current) {
-    const spec = TOGGLES[name];
-    if (!spec || !this.capabilities()[name] || this.confirm[name].pending || current === on) return;
+    const spec = this.#spec(name);
+    if (!spec || this.confirm[name].pending || current === on) return;
     this.send(spec.set, spec.encode(on));
     this.confirm[name].begin(on);
     this.pendingFlags[name] = true;
@@ -138,7 +164,7 @@ class QuickSettings {
     for (const c of Object.values(this.confirm)) c.reset();
     clearTimeout(this.ringTimer);
     this.ringSide = null;
-    this.pendingFlags = { inEar: false, lowLatency: false, spatial: false };
+    this.pendingFlags = { inEar: false, lowLatency: false, personalSound: false, spatial: false };
   }
 
   #stopRing() {
@@ -147,6 +173,10 @@ class QuickSettings {
     this.ringSide = null;
     clearTimeout(this.ringTimer);
     this.patch({ ringing: null });
+  }
+
+  #spec(name) {
+    return TOGGLES[name]?.(this.capabilities()) ?? null;
   }
 
   #setPending(name, value) {

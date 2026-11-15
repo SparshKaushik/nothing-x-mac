@@ -33,7 +33,7 @@ function emptyState() {
     capabilities: {
       transparency: true, strengths: [], adaptive: false, bassSteps: 0, bassLevels: [],
       inEar: false, lowLatency: false, ring: 'buds', spatialModes: [],
-      dualConnection: false, dualRestarts: false,
+      dualConnection: false, dualRestarts: false, personalSound: null,
       eq: { style: 'eq', presets: [], customId: null, trebleHz: 3400 },
     },
   };

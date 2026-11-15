@@ -23,6 +23,7 @@ const POPOVER_SYMBOLS = {
   qsLatency: 'bolt.fill',
   qsFind: 'speaker.wave.2.fill',
   qsSpatial: 'person.spatialaudio.fill',
+  qsPersonalSound: 'waveform.and.person.filled',
   qsDual: 'macbook.and.iphone',
   // Dual connection device rows (guessed from the device name)
   dev_laptop: 'laptopcomputer',

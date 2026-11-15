@@ -20,34 +20,35 @@ const FULL = 63;
 // eq:      equalizer preset profile (see eq-presets.js); treble: custom EQ treble band in Hz
 // spatial: spatial audio capability mask (see SPATIAL_MODES in commands.js); 0 = none
 // dual:    dual connection: 'yes', 'restart' (switching it restarts the earbuds) or 'none'
+// sound:   Personal Sound Profile backend: 'mimi', 'audiodo' or null
 // Some names cover two hardware revisions (e.g. CMF Buds 2 / Buds Pro 2 come in
 // 5-level and 3-step bass versions); the device layer corrects bass from the
 // first report.
 const MODELS = [
-  { name: 'Nothing Headphone (1) Pro', anc: FULL, bass: 0, inEar: true, ring: 'headphone', eq: 'nothing', treble: 3500, spatial: 7, dual: 'yes' },
-  { name: 'Nothing Headphone (1)', anc: FULL, bass: 5, inEar: true, ring: 'headphone', eq: 'nothing', treble: 3500, spatial: 7, dual: 'yes' },
-  { name: 'Nothing Headphone (a)', anc: FULL, bass: 3, inEar: false, ring: 'headphone', eq: 'nothing', treble: 3500, spatial: 28, dual: 'yes' },
-  { name: 'Nothing Ear (open)', anc: FULL, bass: 0, inEar: false, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'yes' },
-  { name: 'CMF Headphone Pro', anc: FULL, bass: 0, inEar: false, ring: 'headphone', eq: 'cmfNoDirac', treble: 3500, spatial: 28, dual: 'yes' },
-  { name: 'CMF Buds 2 Plus', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'cmfNoDirac', treble: 6900, spatial: 6, dual: 'yes' },
-  { name: 'CMF Buds Pro 2', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'cmf', treble: 6900, spatial: 6, dual: 'restart' },
-  { name: 'Nothing Ear (3a)', anc: FULL, bass: 0, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 6, dual: 'yes' },
-  { name: 'Nothing Ear (a)', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'yes' },
-  { name: 'Nothing Ear (3)', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 6, dual: 'yes' },
-  { name: 'Nothing ear (1)', anc: 53, bass: 0, inEar: true, ring: 'single', eq: 'nothingNoCustom', treble: 3400, spatial: 0, dual: 'none' },
-  { name: 'CMF Clip Pro', anc: FULL, bass: 3, inEar: false, ring: 'buds', eq: 'cmfNoDirac', treble: 3400, spatial: 6, dual: 'yes' },
-  { name: 'Neckband Pro', anc: FULL, bass: 5, inEar: false, ring: 'headphone', eq: 'nothing', treble: 6900, spatial: 6, dual: 'restart' },
-  { name: 'Ear (Stick)', anc: 33, bass: 0, inEar: true, ring: 'buds', eq: 'nothing', treble: 3500, spatial: 0, dual: 'none' },
-  { name: 'CMF Buds 2a', anc: 49, bass: 5, inEar: false, ring: 'buds', eq: 'cmfDirac7', treble: 6900, spatial: 0, dual: 'yes' },
-  { name: 'CMF Buds 2', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'cmf', treble: 6900, spatial: 6, dual: 'yes' },
-  { name: 'Nothing Ear', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'yes' },
-  { name: 'CMF Buds', anc: 49, bass: 5, inEar: true, ring: 'buds', eq: 'cmf', treble: 6900, spatial: 0, dual: 'restart' },
-  { name: 'Buds Pro', anc: 55, bass: 0, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'none' },
-  { name: 'Ear (2)', anc: FULL, bass: 0, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'restart' },
+  { name: 'Nothing Headphone (1) Pro', anc: FULL, bass: 0, inEar: true, ring: 'headphone', eq: 'nothing', treble: 3500, spatial: 7, dual: 'yes', sound: 'audiodo' },
+  { name: 'Nothing Headphone (1)', anc: FULL, bass: 5, inEar: true, ring: 'headphone', eq: 'nothing', treble: 3500, spatial: 7, dual: 'yes', sound: 'audiodo' },
+  { name: 'Nothing Headphone (a)', anc: FULL, bass: 3, inEar: false, ring: 'headphone', eq: 'nothing', treble: 3500, spatial: 28, dual: 'yes', sound: null },
+  { name: 'Nothing Ear (open)', anc: FULL, bass: 0, inEar: false, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'yes', sound: null },
+  { name: 'CMF Headphone Pro', anc: FULL, bass: 0, inEar: false, ring: 'headphone', eq: 'cmfNoDirac', treble: 3500, spatial: 28, dual: 'yes', sound: 'audiodo' },
+  { name: 'CMF Buds 2 Plus', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'cmfNoDirac', treble: 6900, spatial: 6, dual: 'yes', sound: 'audiodo' },
+  { name: 'CMF Buds Pro 2', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'cmf', treble: 6900, spatial: 6, dual: 'restart', sound: null },
+  { name: 'Nothing Ear (3a)', anc: FULL, bass: 0, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 6, dual: 'yes', sound: null },
+  { name: 'Nothing Ear (a)', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'yes', sound: null },
+  { name: 'Nothing Ear (3)', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 6, dual: 'yes', sound: 'audiodo' },
+  { name: 'Nothing ear (1)', anc: 53, bass: 0, inEar: true, ring: 'single', eq: 'nothingNoCustom', treble: 3400, spatial: 0, dual: 'none', sound: null },
+  { name: 'CMF Clip Pro', anc: FULL, bass: 3, inEar: false, ring: 'buds', eq: 'cmfNoDirac', treble: 3400, spatial: 6, dual: 'yes', sound: null },
+  { name: 'Neckband Pro', anc: FULL, bass: 5, inEar: false, ring: 'headphone', eq: 'nothing', treble: 6900, spatial: 6, dual: 'restart', sound: null },
+  { name: 'Ear (Stick)', anc: 33, bass: 0, inEar: true, ring: 'buds', eq: 'nothing', treble: 3500, spatial: 0, dual: 'none', sound: null },
+  { name: 'CMF Buds 2a', anc: 49, bass: 5, inEar: false, ring: 'buds', eq: 'cmfDirac7', treble: 6900, spatial: 0, dual: 'yes', sound: null },
+  { name: 'CMF Buds 2', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'cmf', treble: 6900, spatial: 6, dual: 'yes', sound: null },
+  { name: 'Nothing Ear', anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'yes', sound: 'mimi' },
+  { name: 'CMF Buds', anc: 49, bass: 5, inEar: true, ring: 'buds', eq: 'cmf', treble: 6900, spatial: 0, dual: 'restart', sound: null },
+  { name: 'Buds Pro', anc: 55, bass: 0, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'none', sound: null },
+  { name: 'Ear (2)', anc: FULL, bass: 0, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'restart', sound: 'mimi' },
 ].sort((a, b) => b.name.length - a.name.length); // longest first: "CMF Buds 2 Plus" before "CMF Buds"
 
 // Unknown or renamed device: assume what current earbuds support.
-const DEFAULT_MODEL = { anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'yes' };
+const DEFAULT_MODEL = { anc: FULL, bass: 5, inEar: true, ring: 'buds', eq: 'nothing', treble: 3400, spatial: 0, dual: 'yes', sound: null };
 
 function modelForName(name = '') {
   const lower = name.toLowerCase();
@@ -60,10 +61,10 @@ function modelForName(name = '') {
 //   inEar, lowLatency, ring: 'buds' | 'headphone' | 'single',
 //   eq: { style, presets, customId, trebleHz },
 //   spatialModes: [{ key, label }] ([] if none),
-//   dualConnection, dualRestarts,
+//   dualConnection, dualRestarts, personalSound: 'mimi' | 'audiodo' | null,
 // }
 function capabilitiesForName(name) {
-  const { anc, bass, inEar, ring, eq, treble, spatial, dual } = modelForName(name);
+  const { anc, bass, inEar, ring, eq, treble, spatial, dual, sound } = modelForName(name);
   const hasBase = Boolean(anc & ANC_BIT.STRENGTH_BASE);
   const hasMid = Boolean(anc & ANC_BIT.STRENGTH_MID);
 
@@ -82,6 +83,7 @@ function capabilitiesForName(name) {
     spatialModes: spatialModesForMask(spatial),
     dualConnection: dual !== 'none',
     dualRestarts: dual === 'restart',
+    personalSound: sound,
   };
 }
 

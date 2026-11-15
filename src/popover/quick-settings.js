@@ -1,5 +1,5 @@
 // Quick Settings page: Control Center style tiles for in-ear detection, low
-// latency and find my earbuds, plus the firmware version. The Spatial Audio
+// latency, Personal Sound Profile and find my earbuds, plus the firmware version. The Spatial Audio
 // tile on the same page lives in spatial-audio.js.
 // Opened from the gear in the main header; Back or Esc returns.
 //
@@ -12,6 +12,7 @@ window.createQuickSettings = function createQuickSettings({ api, views }) {
   const tiles = {
     inEar: $('qs-in-ear'),
     lowLatency: $('qs-latency'),
+    personalSound: $('qs-personal-sound'),
     find: $('qs-find'),
   };
   const findPanel = $('qs-find-panel');
@@ -32,7 +33,7 @@ window.createQuickSettings = function createQuickSettings({ api, views }) {
 
   // ---- actions --------------------------------------------------------------
 
-  for (const name of ['inEar', 'lowLatency']) {
+  for (const name of ['inEar', 'lowLatency', 'personalSound']) {
     tiles[name].addEventListener('click', () => {
       if (!state || state.quick.pending[name]) return;
       api.setQuickToggle(name, !state.quick[name]);
@@ -77,9 +78,11 @@ window.createQuickSettings = function createQuickSettings({ api, views }) {
 
     tiles.inEar.hidden = !caps.inEar;
     tiles.lowLatency.hidden = !caps.lowLatency;
+    tiles.personalSound.hidden = !caps.personalSound;
 
     renderToggle(tiles.inEar, quick.inEar, quick.pending.inEar);
     renderToggle(tiles.lowLatency, quick.lowLatency, quick.pending.lowLatency);
+    renderToggle(tiles.personalSound, quick.personalSound, quick.pending.personalSound);
 
     // Find my earbuds
     const ringing = quick.ringing;

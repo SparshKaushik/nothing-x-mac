@@ -26,6 +26,11 @@ const Command = {
   SET_DUAL_ENABLE: 0xf01a,
   GET_DUAL_LIST: 0xc028,
   SET_DUAL_CONNECT: 0xf01b,
+  // Personal Sound Profile: Mimi (older Nothing models) or Audiodo (newer ones)
+  GET_MIMI: 0xc022,
+  SET_MIMI: 0xf015,
+  GET_AUDIODO: 0xc05a,
+  SET_AUDIODO: 0xf05c,
 };
 
 // Frames the earbuds send back (replies and unsolicited updates).
@@ -42,6 +47,8 @@ const Response = {
   DUAL_ENABLE: [0x4027],
   DUAL_LIST: [0x4028],
   DUAL_DEVICE_EVENT: [0xe00e], // a remembered device connected or disconnected
+  MIMI: [0x4022],
+  AUDIODO: [0x405a, 0xe019, 0x6019], // reply, plus pushes when it changes on the buds
 };
 
 // ---- Battery ----------------------------------------------------------------
@@ -261,7 +268,15 @@ const decodeDualDeviceEvent = (payload) => ({
 });
 const encodeDualConnect = (mac, connect) => [connect ? 0x01 : 0x00, ...macToBytes(mac)];
 
+// ---- Personal Sound Profile -------------------------------------------------
+
+// Same shape for both backends. payload: [on]
+const decodePersonalSound = (payload) => payload[0] === 1;
+const encodePersonalSound = (on) => [on ? 0x01 : 0x00];
+
 module.exports = {
+  decodePersonalSound,
+  encodePersonalSound,
   decodeDualEnable,
   encodeDualEnable,
   decodeDualList,

@@ -23,6 +23,15 @@ const POPOVER_SYMBOLS = {
   qsLatency: 'bolt.fill',
   qsFind: 'speaker.wave.2.fill',
   qsSpatial: 'person.spatialaudio.fill',
+  qsDual: 'macbook.and.iphone',
+  // Dual connection device rows (guessed from the device name)
+  dev_laptop: 'laptopcomputer',
+  dev_phone: 'iphone',
+  dev_tablet: 'ipad',
+  dev_desktop: 'desktopcomputer',
+  dev_tv: 'tv',
+  dev_watch: 'applewatch',
+  dev_other: 'antenna.radiowaves.left.and.right',
   equalizer: 'slider.vertical.3',
   // Equalizer preset tiles (keys match eq-presets.js)
   eq_balanced: 'equal.circle',

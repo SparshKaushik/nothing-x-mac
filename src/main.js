@@ -101,6 +101,8 @@ ipcMain.on('device:set-bass', (_e, change) => device.setBass(change));
 ipcMain.on('device:set-quick-toggle', (_e, name, on) => device.setQuickToggle(name, on));
 ipcMain.on('device:ring', (_e, side, on) => device.ring(side, on));
 ipcMain.on('device:set-spatial-audio', (_e, mode) => device.setSpatialAudio(mode));
+ipcMain.on('device:set-dual-connection', (_e, on) => device.setDualConnection(on));
+ipcMain.on('device:set-dual-device', (_e, mac, connect) => device.setDualDeviceConnected(mac, connect));
 ipcMain.on('device:set-eq-preset', (_e, id) => device.setEqPreset(id));
 ipcMain.on('device:set-custom-eq', (_e, bands) => device.setCustomEq(bands));
 

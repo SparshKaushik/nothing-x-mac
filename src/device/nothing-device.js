@@ -1,5 +1,5 @@
 // High-level earbud state: connection, name, battery, noise control, bass,
-// equalizer and quick settings. Emits 'change' with a plain snapshot whenever anything updates.
+// equalizer, quick settings and dual connection. Emits 'change' with a plain snapshot whenever anything updates.
 
 const { EventEmitter } = require('node:events');
 const { BluetoothBridge } = require('./bridge');
@@ -11,6 +11,7 @@ const { capabilitiesForName, bassLevels } = require('./models');
 const { ConfirmedSetting } = require('./confirmed-setting');
 const { QuickSettings, initialQuickState } = require('./quick-settings');
 const { Equalizer, initialEqState } = require('./equalizer');
+const { DualConnection, initialDualState } = require('./dual-connection');
 
 const BATTERY_POLL_MS = 60_000;
 const BRIDGE_RESTART_MS = 3_000;
@@ -28,9 +29,11 @@ function emptyState() {
     bassPending: false,
     quick: initialQuickState(),
     eq: initialEqState(),
+    dual: initialDualState(),
     capabilities: {
       transparency: true, strengths: [], adaptive: false, bassSteps: 0, bassLevels: [],
       inEar: false, lowLatency: false, ring: 'buds', spatialModes: [],
+      dualConnection: false, dualRestarts: false,
       eq: { style: 'eq', presets: [], customId: null, trebleHz: 3400 },
     },
   };
@@ -68,6 +71,12 @@ class NothingDevice extends EventEmitter {
       patch: (partial) => this.#update({ eq: { ...this.state.eq, ...partial } }),
       capabilities: () => this.state.capabilities,
       state: () => this.state.eq,
+    });
+    this.dual = new DualConnection({
+      send: (command, payload) => this.#send(command, payload),
+      patch: (partial) => this.#update({ dual: { ...this.state.dual, ...partial } }),
+      capabilities: () => this.state.capabilities,
+      state: () => this.state.dual,
     });
 
     bridge.on('connected', (info) => this.#onConnected(info));
@@ -138,6 +147,16 @@ class NothingDevice extends EventEmitter {
   // bands: any of { bass, mid, treble } in dB
   setCustomEq(bands) {
     if (this.state.connected) this.equalizer.setCustom(bands);
+  }
+
+  // ---- dual connection (see dual-connection.js) -----------------------------
+
+  setDualConnection(on) {
+    if (this.state.connected) this.dual.setEnabled(on);
+  }
+
+  setDualDeviceConnected(mac, connect) {
+    if (this.state.connected) this.dual.setDeviceConnected(mac, connect);
   }
 
   // ---- quick settings (see quick-settings.js) -------------------------------
@@ -230,6 +249,7 @@ class NothingDevice extends EventEmitter {
     }
     this.quick.onConnected(INITIAL_QUERY_GAP_MS * 3);
     this.equalizer.onConnected(INITIAL_QUERY_GAP_MS * 7);
+    this.dual.onConnected(INITIAL_QUERY_GAP_MS * 9);
 
     clearInterval(this.batteryTimer);
     this.batteryTimer = setInterval(() => this.refreshBattery(), BATTERY_POLL_MS);
@@ -253,7 +273,7 @@ class NothingDevice extends EventEmitter {
         if (report) this.#onNoiseReport(report);
       } else if (Response.BASS.includes(frame.command)) {
         if (this.state.capabilities.bassSteps) this.#onBassReport(frame.payload);
-      } else if (!this.equalizer.handle(frame)) {
+      } else if (!this.equalizer.handle(frame) && !this.dual.handle(frame)) {
         this.quick.handle(frame);
       }
     }
@@ -264,6 +284,7 @@ class NothingDevice extends EventEmitter {
     this.bassSetting.reset();
     this.quick.reset();
     this.equalizer.reset();
+    this.dual.reset();
     clearInterval(this.batteryTimer);
     this.batteryTimer = null;
   }

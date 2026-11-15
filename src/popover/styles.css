@@ -591,3 +591,45 @@ hr {
 .qs-check { width: 12px; color: var(--accent); visibility: hidden; }
 .qs-list-row.on .qs-check { visibility: visible; }
 .qs-list.busy .qs-list-row:not(.on) { opacity: 0.45; pointer-events: none; }
+
+/* ---- Dual connection device rows (Quick Settings) ---- */
+.dual { margin: 8px 10px 0; }
+.dual-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.dual-head span:last-child { font-weight: 400; font-variant-numeric: tabular-nums; }
+.dual-list {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--chip);
+}
+.dual-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: default;
+  transition: opacity 150ms ease, background-color 150ms ease;
+}
+.dual-row:hover:not(.locked) { background: var(--hover); }
+.dual-row:focus,
+.dual-row:focus-visible { outline: none; }
+.dual-row .qs-icon { width: 26px; height: 26px; }
+.dual-row .qs-icon .sym { width: 14px; height: 14px; }
+.dual-row.on .qs-icon { background: var(--accent); color: #fff; box-shadow: none; }
+.dual-row.locked { pointer-events: none; }
+.dual-row.dim { opacity: 0.45; }
+.dual .qs-note { margin: 6px 4px 0; }

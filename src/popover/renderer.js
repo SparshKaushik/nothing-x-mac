@@ -5,6 +5,7 @@ const LOW_BATTERY = 20;
 let strengthControl = null;
 let bassControl = null;
 let quickSettings = null;
+let equalizer = null;
 
 // One switch at a time across mode buttons and intensity segments.
 const switchLock = window.createSwitchLock({
@@ -60,6 +61,7 @@ function render(state) {
   strengthControl.render(state);
   bassControl.render(state);
   quickSettings.render(state);
+  equalizer.render(state);
 }
 
 async function main() {
@@ -77,7 +79,9 @@ async function main() {
     symbols,
     onChange: (change) => window.nx.setBass(change),
   });
-  quickSettings = window.createQuickSettings({ api: window.nx });
+  const views = window.createViews({ mainId: 'view-main' });
+  quickSettings = window.createQuickSettings({ api: window.nx, views });
+  equalizer = window.createEqualizer({ api: window.nx, views, symbols });
 
   render(device);
   window.nx.onDeviceState(render);

@@ -14,6 +14,13 @@ const Command = {
   GET_FIRMWARE: 0xc042,
   START_FIT_TEST: 0xf014,
   RING: 0xf002,
+  // Equalizer presets: Nothing models use "EQ", CMF models "listening mode".
+  GET_EQ: 0xc01f,
+  SET_EQ: 0xf010,
+  GET_LISTENING_MODE: 0xc050,
+  SET_LISTENING_MODE: 0xf01d,
+  GET_CUSTOM_EQ: 0xc044,
+  SET_CUSTOM_EQ: 0xf041,
 };
 
 // Frames the earbuds send back (replies and unsolicited updates).
@@ -25,6 +32,8 @@ const Response = {
   LOW_LATENCY: [0x4041],
   FIRMWARE: [0x4042],
   FIT_TEST: [0xe00d],
+  EQ_PRESET: [0x401f, 0x4050], // reply to GET_EQ / GET_LISTENING_MODE
+  CUSTOM_EQ: [0x4044],
 };
 
 // ---- Battery ----------------------------------------------------------------
@@ -132,9 +141,62 @@ function encodeRing(style, side, on) {
   return [side === 'left' ? 0x02 : 0x03, flag];
 }
 
+// ---- Equalizer --------------------------------------------------------------
+
+// Preset id. payload: [preset, ...]
+const decodePreset = (payload) => payload[0] ?? null;
+const encodePreset = (id) => [id, 0x00];
+
+// Custom EQ: three filters, gains in dB (−6..+6), floats little-endian.
+//   payload: [count, totalGain f32, (type u8, gain f32, freq f32, q f32) × count, 3 zero bytes × count]
+// Filter types: 0 low shelf (Bass), 1 peak (Mid), 2 high shelf (Treble).
+const FILTER = { LOW_SHELF: 0, PEAK: 1, HIGH_SHELF: 2 };
+const BAND_FOR_FILTER = { 0: 'bass', 1: 'mid', 2: 'treble' };
+const BAND_BYTES = 13;
+
+function decodeCustomEq(payload) {
+  const buf = Buffer.from(payload);
+  const count = buf[0] ?? 0;
+  const bands = { bass: 0, mid: 0, treble: 0 };
+  for (let i = 0; i < count; i++) {
+    const at = 5 + i * BAND_BYTES;
+    if (at + 5 > buf.length) break;
+    const band = BAND_FOR_FILTER[buf[at]];
+    if (band) bands[band] = Math.round(buf.readFloatLE(at + 1));
+  }
+  return bands;
+}
+
+// trebleHz differs per model (3400, 3500 or 6900 Hz).
+function encodeCustomEq({ bass, mid, treble }, trebleHz) {
+  const bands = [
+    { type: FILTER.PEAK, gain: mid, freq: 980, q: 0.7 },
+    { type: FILTER.HIGH_SHELF, gain: treble, freq: trebleHz, q: 1.0 },
+    { type: FILTER.LOW_SHELF, gain: bass, freq: 140, q: 0.8 },
+  ];
+  // Overall gain is lowered by the largest boost so the result doesn't clip.
+  const totalGain = -Math.max(0, ...bands.map((b) => b.gain));
+
+  const buf = Buffer.alloc(1 + 4 + bands.length * BAND_BYTES + bands.length * 3);
+  let at = 0;
+  buf[at++] = bands.length;
+  buf.writeFloatLE(totalGain, at); at += 4;
+  for (const b of bands) {
+    buf[at++] = b.type;
+    buf.writeFloatLE(b.gain, at); at += 4;
+    buf.writeFloatLE(b.freq, at); at += 4;
+    buf.writeFloatLE(b.q, at); at += 4;
+  }
+  return [...buf];
+}
+
 module.exports = {
   Command,
   Response,
+  decodePreset,
+  encodePreset,
+  decodeCustomEq,
+  encodeCustomEq,
   decodeBattery,
   decodeNoiseMode,
   encodeNoiseMode,

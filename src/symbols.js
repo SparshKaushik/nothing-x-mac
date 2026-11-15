@@ -23,6 +23,19 @@ const POPOVER_SYMBOLS = {
   qsLatency: 'bolt.fill',
   qsFitTest: 'ear.badge.waveform',
   qsFind: 'speaker.wave.2.fill',
+  equalizer: 'slider.vertical.3',
+  // Equalizer preset tiles (keys match eq-presets.js)
+  eq_balanced: 'equal.circle',
+  eq_moreBass: 'speaker.wave.3.fill',
+  eq_moreTreble: 'waveform.path.ecg',
+  eq_voice: 'person.wave.2',
+  eq_dirac: 'sparkles',
+  eq_pop: 'music.note',
+  eq_rock: 'guitars.fill',
+  eq_classical: 'pianokeys',
+  eq_electronic: 'waveform.path',
+  eq_vocals: 'music.mic',
+  eq_custom: 'slider.horizontal.3',
 };
 
 function loadSymbol(name) {

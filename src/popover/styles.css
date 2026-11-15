@@ -494,3 +494,70 @@ hr {
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
+
+/* ---- Equalizer ---- */
+.eq-tile { min-height: 44px; }
+.qs-tiles.busy .eq-tile:not(.on) { opacity: 0.45; pointer-events: none; }
+.eq-tile { transition: opacity 150ms ease, background-color 150ms ease; }
+
+.eq-custom { margin-top: 10px; }
+
+.eq-curve {
+  display: block;
+  width: calc(100% - 28px);
+  height: 64px;
+  margin: 0 14px 6px;
+  border-radius: 8px;
+  background: var(--chip);
+}
+.eq-zero { stroke: var(--separator); stroke-width: 1; stroke-dasharray: 3 3; }
+.eq-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+.eq-area { fill: var(--accent); opacity: 0.15; stroke: none; }
+
+.eq-sliders { padding: 0 14px 4px; }
+.eq-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 12px;
+}
+.eq-value {
+  text-align: right;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bipolar slider: the accent fill runs from 0 dB (centre) to the value. */
+.eq-row input[type="range"] {
+  --from: 50%;
+  --to: 50%;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+}
+.eq-row input[type="range"]:focus { outline: none; }
+.eq-row input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--chip) var(--from),
+    var(--accent) var(--from),
+    var(--accent) var(--to),
+    var(--chip) var(--to)
+  );
+}
+.eq-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.3);
+}

@@ -27,11 +27,8 @@ function fitTileText(fitTest) {
   return fitTest.left === 'good' && fitTest.right === 'good' ? 'Good fit' : 'Adjust fit';
 }
 
-window.createQuickSettings = function createQuickSettings({ api }) {
+window.createQuickSettings = function createQuickSettings({ api, views }) {
   const $ = (id) => document.getElementById(id);
-  const panel = $('panel');
-  const viewMain = $('view-main');
-  const viewSettings = $('view-settings');
   const gear = $('settings');
 
   const tiles = {
@@ -49,30 +46,12 @@ window.createQuickSettings = function createQuickSettings({ api }) {
 
   // ---- navigation -----------------------------------------------------------
 
-  function show(settings) {
-    if (settings === !viewSettings.hidden) return;
-    viewMain.hidden = settings;
-    viewSettings.hidden = !settings;
-    const view = settings ? viewSettings : viewMain;
-    view.classList.remove('enter-forward', 'enter-back');
-    void view.offsetWidth; // restart the slide-in animation
-    view.classList.add(settings ? 'enter-forward' : 'enter-back');
-    panel.classList.toggle('in-settings', settings);
-  }
-
   gear.addEventListener('click', () => {
-    if (state?.connected) show(true);
+    if (state?.connected) views.open('view-settings');
   });
-  $('qs-back').addEventListener('click', () => show(false));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !viewSettings.hidden) show(false);
-  });
-  // Like Control Center, reopening the panel starts on the main view.
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      show(false);
-      findOpen = false;
-    }
+  $('qs-back').addEventListener('click', () => views.back());
+  views.onBack(() => {
+    findOpen = false;
   });
 
   // ---- actions --------------------------------------------------------------
@@ -118,8 +97,7 @@ window.createQuickSettings = function createQuickSettings({ api }) {
     state = next;
     gear.disabled = !next.connected;
     if (!next.connected) {
-      show(false);
-      findOpen = false;
+      if (views.isOpen('view-settings')) views.back();
       return;
     }
 

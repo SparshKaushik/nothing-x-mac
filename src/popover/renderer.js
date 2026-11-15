@@ -104,6 +104,7 @@ async function main() {
   });
 
   $('#quit').addEventListener('click', () => window.nx.quit());
+  $('#made-by-link').addEventListener('click', () => window.nx.openAuthor());
 
   // Keep the window sized to the content as states change.
   const panel = $('#panel');

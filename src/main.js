@@ -1,5 +1,5 @@
 const {
-  app, BrowserWindow, Tray, Menu, ipcMain, screen, systemPreferences,
+  app, BrowserWindow, Tray, Menu, ipcMain, screen, systemPreferences, shell,
 } = require('electron');
 const path = require('node:path');
 const { popoverSymbolDataUrls, trayIcon } = require('./symbols');
@@ -8,6 +8,7 @@ const loginItem = require('./login-item');
 const { NothingDevice } = require('./device/nothing-device');
 
 const APP_NAME = 'Nothing X Mac';
+const AUTHOR_URL = 'https://yashraut.me';
 const POPOVER_WIDTH = 300;
 
 let tray = null;
@@ -146,6 +147,7 @@ ipcMain.on('popover:set-height', (_e, height) => {
 });
 
 ipcMain.on('app:quit', () => app.quit());
+ipcMain.on('app:open-author', () => shell.openExternal(AUTHOR_URL));
 
 app.whenReady().then(() => {
   if (process.platform === 'darwin') app.dock.hide();
@@ -176,6 +178,8 @@ app.whenReady().then(() => {
           enabled: loginItem.isSupported(),
           click: (item) => loginItem.setEnabled(item.checked),
         },
+        { type: 'separator' },
+        { label: 'Made by Yash Raut · yashraut.me', click: () => shell.openExternal(AUTHOR_URL) },
         { type: 'separator' },
         { label: `Quit ${APP_NAME}`, click: () => app.quit() },
       ])

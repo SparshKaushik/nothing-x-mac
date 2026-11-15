@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('nx', {
   setHeight: (h) => ipcRenderer.send('popover:set-height', h),
   onAccent: (cb) => ipcRenderer.on('popover:accent', (_e, color) => cb(color)),
   quit: () => ipcRenderer.send('app:quit'),
+  openAuthor: () => ipcRenderer.send('app:open-author'),
 
   onDeviceState: (cb) => ipcRenderer.on('device:state', (_e, state) => cb(state)),
   setNoiseMode: (mode) => ipcRenderer.send('device:set-noise-mode', mode),

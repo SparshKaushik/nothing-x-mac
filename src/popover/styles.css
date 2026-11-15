@@ -760,3 +760,29 @@ hr {
 .checkbox:disabled { opacity: 0.55; }
 .checkbox:focus,
 .checkbox:focus-visible { outline: none; }
+
+/* ---- Footer: made by (the whole line opens yashraut.me) ---- */
+.made-by {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: calc(100% - 28px);
+  margin: 8px 14px 0;
+  padding: 8px 0 0;
+  border: 0;
+  border-top: 1px solid var(--separator);
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 10.5px;
+  cursor: default;
+  transition: color 120ms ease;
+}
+.made-by:hover { color: var(--text); }
+.made-by:hover .made-by-name { text-decoration: underline; }
+.made-by:focus,
+.made-by:focus-visible { outline: none; }
+/* Monochrome heart in the text colour, not a red emoji. */
+.made-by .heart { width: 10px; height: 9px; color: var(--text); }
+.made-by-name { color: var(--text); font-weight: 600; }

@@ -14,6 +14,10 @@
   macOS 13+ · Apple Silicon and Intel
 </p>
 
+<p align="center">
+  Made by <a href="https://yashraut.me"><b>Yash Raut</b></a> · open to new roles
+</p>
+
 ---
 
 Nothing's companion app, Nothing X, only exists for phones. On a Mac, your
@@ -104,6 +108,14 @@ src/device/               Earbud protocol and state
 src/popover/              Panel UI (one file per control / page)
 scripts/                  Packaging, app icon and release builds
 ```
+
+## About the author
+
+Built by **Yash Raut**. I enjoy shipping polished, native-feeling apps end to
+end, from Bluetooth protocols to UI design.
+
+**I'm currently looking for my next role.** If you're hiring, or this project
+was useful to you, I'd love to hear from you: **[yashraut.me](https://yashraut.me)**.
 
 ## Credits
 

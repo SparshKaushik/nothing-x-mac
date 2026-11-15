@@ -21,6 +21,7 @@ const POPOVER_SYMBOLS = {
   qsLatency: 'bolt.fill',
   qsFind: 'speaker.wave.2.fill',
   qsSpatial: 'person.spatialaudio.fill',
+  heart: 'heart.fill',
   qsPersonalSound: 'waveform.and.person.filled',
   qsDual: 'macbook.and.iphone',
   popUpChevrons: 'chevron.up.chevron.down',

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    />
+    <title>Nothing X Mac</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="panel" class="panel">
+      <header class="header">
+        <span class="device-badge"><i class="sym" data-sym="device"></i></span>
+        <div class="header-text">
+          <div class="title" id="device-name">Nothing Ear</div>
+          <div class="subtitle">Connected</div>
+        </div>
+      </header>
+
+      <section class="battery" aria-label="Battery">
+        <div class="bud" data-part="left">
+          <i class="sym bud-icon" data-sym="budLeft"></i>
+          <div class="bud-label">Left</div>
+          <div class="bud-level"><span class="pct"></span><span class="batt"><span class="fill"></span></span></div>
+        </div>
+        <div class="bud" data-part="right">
+          <i class="sym bud-icon" data-sym="budRight"></i>
+          <div class="bud-label">Right</div>
+          <div class="bud-level"><span class="pct"></span><span class="batt"><span class="fill"></span></span></div>
+        </div>
+        <div class="bud" data-part="case">
+          <i class="sym bud-icon" data-sym="case"></i>
+          <div class="bud-label">Case</div>
+          <div class="bud-level"><span class="pct"></span><span class="batt"><span class="fill"></span></span></div>
+        </div>
+      </section>
+
+      <hr />
+
+      <section class="section" aria-label="Noise Control">
+        <div class="section-title">Noise Control</div>
+        <div class="options" role="radiogroup" id="noise-options">
+          <button class="row option" role="radio" data-mode="anc">
+            <span class="option-icon"><i class="sym" data-sym="anc"></i></span>
+            <span class="row-label">Noise Cancellation</span>
+          </button>
+          <button class="row option" role="radio" data-mode="transparency">
+            <span class="option-icon"><i class="sym" data-sym="transparency"></i></span>
+            <span class="row-label">Transparency</span>
+          </button>
+          <button class="row option" role="radio" data-mode="off">
+            <span class="option-icon"><i class="sym" data-sym="off"></i></span>
+            <span class="row-label">Off</span>
+          </button>
+        </div>
+      </section>
+
+      <hr />
+
+      <div class="footer">
+        <button class="row plain" id="settings">Nothing X Settings…</button>
+        <button class="row plain" id="quit">Quit Nothing X Mac</button>
+      </div>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

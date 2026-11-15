@@ -1,0 +1,190 @@
+:root {
+  --accent: #007aff;
+  --text: rgba(0, 0, 0, 0.85);
+  --text-secondary: rgba(0, 0, 0, 0.5);
+  --separator: rgba(0, 0, 0, 0.1);
+  --hover: rgba(0, 0, 0, 0.08);
+  --chip: rgba(0, 0, 0, 0.09);
+  --batt-outline: rgba(0, 0, 0, 0.35);
+  --batt-low: #ff3b30;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: rgba(255, 255, 255, 0.88);
+    --text-secondary: rgba(255, 255, 255, 0.5);
+    --separator: rgba(255, 255, 255, 0.12);
+    --hover: rgba(255, 255, 255, 0.1);
+    --chip: rgba(255, 255, 255, 0.14);
+    --batt-outline: rgba(255, 255, 255, 0.4);
+    --batt-low: #ff453a;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: transparent;
+  color: var(--text);
+  font: 13px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+  overflow: hidden;
+}
+
+.panel { padding: 6px 0; }
+
+/* SF Symbol glyph rendered as a mask so it follows currentColor. */
+.sym {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask: var(--sym) center / contain no-repeat;
+  mask: var(--sym) center / contain no-repeat;
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  margin: 5px 14px;
+  background: var(--separator);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 8px;
+}
+.device-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+}
+.device-badge .sym { width: 17px; height: 13px; }
+.title { font-weight: 600; }
+.subtitle { font-size: 11px; color: var(--text-secondary); }
+
+/* Battery */
+.battery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 4px 10px 8px;
+}
+.bud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.bud-icon { width: 34px; height: 34px; margin-bottom: 2px; }
+.bud-label { font-size: 11px; color: var(--text-secondary); }
+.bud-level {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.batt {
+  position: relative;
+  width: 22px;
+  height: 11px;
+  padding: 1.5px;
+  border: 1px solid var(--batt-outline);
+  border-radius: 3.5px;
+}
+.batt::after {
+  content: "";
+  position: absolute;
+  right: -3.5px;
+  top: 3px;
+  width: 2px;
+  height: 3.5px;
+  border-radius: 0 1px 1px 0;
+  background: var(--batt-outline);
+}
+.batt .fill {
+  display: block;
+  height: 100%;
+  border-radius: 1.5px;
+  background: var(--text);
+}
+.bud.low .batt .fill { background: var(--batt-low); }
+.bud.charging .batt .fill { background: #34c759; }
+
+/* Sections and rows */
+.section-title {
+  padding: 4px 14px 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: calc(100% - 10px);
+  margin: 0 5px;
+  padding: 4px 9px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+.row:hover { background: var(--hover); }
+.row:focus,
+.row:focus-visible { outline: none; }
+.row.plain { padding-top: 3px; padding-bottom: 3px; }
+
+/* Noise Control: three options side by side, icon above label. */
+.options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 4px 8px 6px;
+}
+.option {
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 5px;
+  width: auto;
+  margin: 0;
+  padding: 4px 2px;
+  text-align: center;
+}
+.option:hover { background: transparent; }
+.option:hover .option-icon { filter: brightness(1.15); }
+.option .row-label {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.option-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--chip);
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.option-icon .sym { width: 17px; height: 17px; }
+.option[aria-checked="true"] .option-icon {
+  background: var(--accent);
+  color: #fff;
+}

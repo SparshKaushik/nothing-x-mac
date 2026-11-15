@@ -1,0 +1,14 @@
+{
+  "name": "nothing-x-mac",
+  "productName": "Nothing X Mac",
+  "version": "0.1.0",
+  "description": "Nothing X Mac",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^45.3.2"
+  }
+}

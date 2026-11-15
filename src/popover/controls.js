@@ -8,13 +8,6 @@
 // Loaded as a classic script before renderer.js; exposes one global factory.
 
 const NOISE_VALUE = 'noise';
-// Noise cycle codes on the wire (see src/device/gesture-profiles.js).
-const NOISE_CYCLES = {
-  10: { anc: true, transparency: true, off: true },
-  20: { anc: false, transparency: true, off: true },
-  21: { anc: true, transparency: false, off: true },
-  22: { anc: true, transparency: true, off: false },
-};
 const NOISE_MODES = [
   ['anc', 'Noise Cancellation'],
   ['transparency', 'Transparency'],
@@ -54,8 +47,10 @@ window.createControls = function createControls({ api, views, symbols }) {
     });
   }
 
+  // Noise cycle code -> { anc, transparency, off }, from the device capabilities.
+  const noiseCycles = () => state?.capabilities.gestures?.noiseCycles ?? {};
   // Current UI value for a slot: 'noise' for any noise cycle code.
-  const uiValue = (code) => (code in NOISE_CYCLES ? NOISE_VALUE : code);
+  const uiValue = (code) => (code in noiseCycles() ? NOISE_VALUE : code);
 
   async function openMenu(slot, button) {
     const current = uiValue(state.gestures[side][slot.key]);
@@ -104,7 +99,7 @@ window.createControls = function createControls({ api, views, symbols }) {
   }
 
   function noiseRows(slotKey, code) {
-    const cycle = NOISE_CYCLES[code];
+    const cycle = noiseCycles()[code];
     const onCount = Object.values(cycle).filter(Boolean).length;
     return NOISE_MODES.map(([mode, label]) => {
       const checked = cycle[mode];
@@ -150,7 +145,7 @@ window.createControls = function createControls({ api, views, symbols }) {
     // Noise Control checkboxes for the gesture that's set to Noise Control.
     const noiseSlot = caps.slots.find((s) => s.actions.some((a) => a.value === NOISE_VALUE));
     const noiseCode = noiseSlot ? next.gestures[side][noiseSlot.key] : undefined;
-    noiseSection.hidden = !(noiseCode in NOISE_CYCLES);
+    noiseSection.hidden = !(noiseCode in noiseCycles());
     if (!noiseSection.hidden) noiseGroup.replaceChildren(...noiseRows(noiseSlot.key, noiseCode));
   }
 

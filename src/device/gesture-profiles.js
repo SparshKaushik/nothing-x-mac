@@ -16,7 +16,6 @@ const NOISE_CYCLE_CODES = [
 const DEFAULT_NOISE_CODE = 22;
 
 const isNoiseCode = (code) => NOISE_CYCLE_CODES.some((n) => n.code === code);
-const noiseCycleForCode = (code) => NOISE_CYCLE_CODES.find((n) => n.code === code)?.cycle ?? null;
 function noiseCodeForCycle(cycle) {
   return NOISE_CYCLE_CODES.find((n) => n.cycle.anc === Boolean(cycle.anc)
     && n.cycle.transparency === Boolean(cycle.transparency)
@@ -48,12 +47,14 @@ const PROFILES = {
   },
 };
 
-// -> { sides, slots: [{ key, label, type, actions: [{ value, label }] }] } or null
+// -> { sides, slots: [{ key, label, type, actions: [{ value, label }] }], noiseCycles } or null
+// noiseCycles maps each noise cycle code to { anc, transparency, off } for the UI.
 function gestureCapabilities(profileName) {
   const profile = PROFILES[profileName];
   if (!profile) return null;
   return {
     sides: profile.sides,
+    noiseCycles: Object.fromEntries(NOISE_CYCLE_CODES.map(({ code, cycle }) => [code, cycle])),
     slots: profile.slots.map((s) => ({
       key: s.key,
       label: s.label,
@@ -67,7 +68,6 @@ module.exports = {
   NOISE_CONTROL,
   DEFAULT_NOISE_CODE,
   isNoiseCode,
-  noiseCycleForCode,
   noiseCodeForCycle,
   gestureCapabilities,
 };

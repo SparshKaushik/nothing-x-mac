@@ -82,4 +82,4 @@ class FrameParser {
   }
 }
 
-module.exports = { crc16, encodeFrame, FrameParser };
+module.exports = { encodeFrame, FrameParser };

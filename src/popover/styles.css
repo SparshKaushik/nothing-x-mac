@@ -76,7 +76,15 @@ hr {
   background: var(--accent);
   color: #fff;
 }
-.device-badge .sym { width: 17px; height: 13px; }
+/* App logo, drawn in the badge's text colour via a mask (src/assets/logo.svg). */
+.device-badge .logo {
+  display: block;
+  width: 16px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask: url("../assets/logo.svg") center / contain no-repeat;
+  mask: url("../assets/logo.svg") center / contain no-repeat;
+}
 .header-text { flex: 1; min-width: 0; }
 .header-actions {
   display: flex;
@@ -129,7 +137,13 @@ hr {
   flex-direction: column;
   align-items: center;
   gap: 3px;
+  padding: 4px 0;
+  border-radius: 8px;
+  transition: background-color 120ms ease;
 }
+/* Left/right buds open their gesture controls (models with gesture support). */
+.bud.clickable:hover { background: var(--hover); }
+.bud.clickable:active { background: var(--chip); }
 .bud-icon { width: 34px; height: 34px; margin-bottom: 2px; }
 .bud-label { font-size: 11px; color: var(--text-secondary); }
 .bud-level {
@@ -746,9 +760,3 @@ hr {
 .checkbox:disabled { opacity: 0.55; }
 .checkbox:focus,
 .checkbox:focus-visible { outline: none; }
-
-/* Battery row buds open their gesture controls (models with gesture support) */
-.bud { border-radius: 8px; padding: 4px 0; transition: background-color 120ms ease; }
-.bud.clickable { cursor: default; }
-.bud.clickable:hover { background: var(--hover); }
-.bud.clickable:active { background: var(--chip); }

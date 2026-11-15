@@ -29,6 +29,8 @@ async function main() {
     asar: true,
     appBundleId: 'com.nothingxmac.app',
     appCategoryType: 'public.app-category.utilities',
+    // App icon (Finder, Applications, Login Items); regenerate with npm run build:icon.
+    icon: path.join(ROOT, 'packaging', 'icon.icns'),
     extendInfo: path.join(ROOT, 'packaging', 'Info.plist'),
     // The Swift Bluetooth helper goes in Contents/Resources (see src/device/bridge.js).
     extraResource: [path.join(ROOT, 'build', 'nx-bridge')],

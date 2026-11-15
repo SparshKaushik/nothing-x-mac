@@ -1,11 +1,10 @@
 // Page navigation inside the popover: the main view plus sub-pages
-// (Quick Settings, Equalizer) that slide in from the right. Back or Esc
+// (Quick Settings, Equalizer, Controls) that slide in from the right. Back or Esc
 // returns; reopening the panel always starts on the main view.
 //
 // Loaded as a classic script before the pages that use it.
 
 window.createViews = function createViews({ mainId }) {
-  const panel = document.getElementById('panel');
   const main = document.getElementById(mainId);
   let current = main;
   const backListeners = [];
@@ -22,7 +21,6 @@ window.createViews = function createViews({ mainId }) {
     view.hidden = false;
     if (animated) animate(view, direction);
     current = view;
-    panel.classList.toggle('in-subpage', view !== main);
     if (view === main) backListeners.forEach((fn) => fn());
   }
 

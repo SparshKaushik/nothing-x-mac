@@ -4,6 +4,7 @@ const {
 const path = require('node:path');
 const { popoverSymbolDataUrls, trayIcon } = require('./symbols');
 const { trayLogoIcon } = require('./tray-logo');
+const loginItem = require('./login-item');
 const { NothingDevice } = require('./device/nothing-device');
 
 const APP_NAME = 'Nothing X Mac';
@@ -118,6 +119,7 @@ ipcMain.on('app:quit', () => app.quit());
 app.whenReady().then(() => {
   if (process.platform === 'darwin') app.dock.hide();
 
+  loginItem.enableOnFirstRun();
   createPopover();
   device.start();
 
@@ -134,7 +136,18 @@ app.whenReady().then(() => {
   tray.on('right-click', () => {
     hidePopover();
     tray.popUpContextMenu(
-      Menu.buildFromTemplate([{ label: `Quit ${APP_NAME}`, click: () => app.quit() }])
+      Menu.buildFromTemplate([
+        {
+          label: 'Open at Login',
+          type: 'checkbox',
+          checked: loginItem.isEnabled(),
+          // Only the installed app can start at login (npm run dist).
+          enabled: loginItem.isSupported(),
+          click: (item) => loginItem.setEnabled(item.checked),
+        },
+        { type: 'separator' },
+        { label: `Quit ${APP_NAME}`, click: () => app.quit() },
+      ])
     );
   });
 

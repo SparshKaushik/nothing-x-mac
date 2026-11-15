@@ -52,7 +52,7 @@
 
       <hr />
 
-      <section class="section" aria-label="Noise Control">
+      <section class="section" id="noise-section" aria-label="Noise Control">
         <div class="section-title">Noise Control</div>
         <div class="options" role="radiogroup" id="noise-options">
           <button class="row option" role="radio" data-mode="anc">
@@ -68,10 +68,17 @@
             <span class="row-label">Off</span>
           </button>
         </div>
+
+        <div class="strength" id="strength" hidden>
+          <div class="section-title">Intensity</div>
+          <div class="segmented" id="strength-segments" role="radiogroup" aria-label="Noise cancellation intensity"></div>
+        </div>
       </section>
       </div>
     </div>
 
+    <script src="switch-lock.js"></script>
+    <script src="strength-control.js"></script>
     <script src="renderer.js"></script>
   </body>
 </html>

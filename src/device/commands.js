@@ -35,39 +35,29 @@ function decodeBattery(payload) {
 
 // ---- Noise control ----------------------------------------------------------
 
-// Wire codes. The earbuds report several noise-cancellation strengths;
-// this app groups them under one "anc" mode.
-const NOISE_CODE = {
-  ANC_HIGH: 0x01,
-  ANC_MID: 0x02,
-  ANC_LOW: 0x03,
-  ANC_ADAPTIVE: 0x04,
-  OFF: 0x05,
-  TRANSPARENCY: 0x07,
-};
+// One wire code covers both the mode and, for noise cancellation, its strength.
+const NOISE_CODES = [
+  { code: 0x01, mode: 'anc', strength: 'high' },
+  { code: 0x02, mode: 'anc', strength: 'mid' },
+  { code: 0x03, mode: 'anc', strength: 'low' },
+  { code: 0x04, mode: 'anc', strength: 'adaptive' },
+  { code: 0x05, mode: 'off', strength: null },
+  { code: 0x07, mode: 'transparency', strength: null },
+];
 
-const MODE_TO_CODE = {
-  anc: NOISE_CODE.ANC_HIGH,
-  transparency: NOISE_CODE.TRANSPARENCY,
-  off: NOISE_CODE.OFF,
-};
-
-function codeToMode(code) {
-  if (code === NOISE_CODE.OFF) return 'off';
-  if (code === NOISE_CODE.TRANSPARENCY) return 'transparency';
-  if (code >= NOISE_CODE.ANC_HIGH && code <= NOISE_CODE.ANC_ADAPTIVE) return 'anc';
-  return null;
-}
-
-// payload: [?, code, ...]
+// payload: [?, code, ...] -> { mode, strength } or null
 function decodeNoiseMode(payload) {
-  return codeToMode(payload[1]);
+  const entry = NOISE_CODES.find((e) => e.code === payload[1]);
+  return entry ? { mode: entry.mode, strength: entry.strength } : null;
 }
 
-function encodeNoiseMode(mode) {
-  const code = MODE_TO_CODE[mode];
-  if (code === undefined) throw new Error(`Unknown noise mode: ${mode}`);
-  return [0x01, code, 0x00];
+// strength only matters for mode "anc"; it defaults to high.
+function encodeNoiseMode(mode, strength = 'high') {
+  const entry = NOISE_CODES.find(
+    (e) => e.mode === mode && (mode !== 'anc' || e.strength === strength)
+  );
+  if (!entry) throw new Error(`Unknown noise mode: ${mode}/${strength}`);
+  return [0x01, entry.code, 0x00];
 }
 
 module.exports = {

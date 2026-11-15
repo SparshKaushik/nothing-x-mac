@@ -1,6 +1,12 @@
 // Popover view: renders device state pushed from the main process.
 
 const LOW_BATTERY = 20;
+let strengthControl = null; // created once SF Symbols arrive from main
+
+// One switch at a time across mode buttons and intensity segments.
+const switchLock = window.createSwitchLock({
+  onToggle: (locked) => document.getElementById('noise-section').classList.toggle('busy', locked),
+});
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -21,6 +27,9 @@ function renderBattery(battery) {
   for (const part of ['left', 'right', 'case']) {
     const el = $(`.bud[data-part="${part}"]`);
     const info = battery[part];
+    // No case data (e.g. case closed or out of range): drop the column so the
+    // buds sit centred. Missing buds stay visible but dimmed.
+    if (part === 'case') el.hidden = !info;
     el.classList.toggle('unavailable', !info);
     el.classList.toggle('charging', Boolean(info?.charging));
     el.classList.toggle('low', Boolean(info && !info.charging && info.level <= LOW_BATTERY));
@@ -35,10 +44,17 @@ function renderNoiseMode(mode) {
   }
 }
 
+function renderCapabilities(capabilities) {
+  $('.option[data-mode="transparency"]').hidden = !capabilities.transparency;
+}
+
 function render(state) {
   renderHeader(state);
   renderBattery(state.battery);
+  renderCapabilities(state.capabilities);
+  switchLock.sync(state.noisePending);
   renderNoiseMode(state.noiseMode);
+  strengthControl.render(state);
 }
 
 async function main() {
@@ -47,12 +63,19 @@ async function main() {
   window.nx.onAccent((c) => document.documentElement.style.setProperty('--accent', c));
   applySymbols(symbols);
 
+  strengthControl = window.createStrengthControl({
+    symbols,
+    lock: switchLock,
+    onChange: (strength) => window.nx.setAncStrength(strength),
+  });
+
   render(device);
   window.nx.onDeviceState(render);
 
   $('#noise-options').addEventListener('click', (e) => {
     const btn = e.target.closest('.option');
-    if (!btn) return;
+    if (!btn || switchLock.locked || btn.getAttribute('aria-checked') === 'true') return;
+    switchLock.lock(); // no more changes until the buds confirm this one
     renderNoiseMode(btn.dataset.mode); // optimistic; device state confirms
     window.nx.setNoiseMode(btn.dataset.mode);
   });

@@ -94,6 +94,7 @@ ipcMain.handle('popover:init', () => ({
 }));
 
 ipcMain.on('device:set-noise-mode', (_e, mode) => device.setNoiseMode(mode));
+ipcMain.on('device:set-anc-strength', (_e, strength) => device.setAncStrength(strength));
 
 device.on('change', (state) => {
   if (popover && !popover.isDestroyed()) popover.webContents.send('device:state', state);

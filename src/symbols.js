@@ -12,6 +12,10 @@ const POPOVER_SYMBOLS = {
   bolt: 'bolt.fill',
   settings: 'gearshape',
   power: 'power',
+  ancLow: 'dial.low',
+  ancMid: 'dial.medium',
+  ancHigh: 'dial.high',
+  ancAdaptive: 'sparkles',
 };
 
 function loadSymbol(name) {

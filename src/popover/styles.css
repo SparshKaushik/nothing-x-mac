@@ -7,6 +7,8 @@
   --chip: rgba(0, 0, 0, 0.09);
   --batt-outline: rgba(0, 0, 0, 0.35);
   --batt-low: #ff3b30;
+  --segment-on: #fff;
+  --segment-on-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.18);
   color-scheme: light dark;
 }
 
@@ -19,10 +21,13 @@
     --chip: rgba(255, 255, 255, 0.14);
     --batt-outline: rgba(255, 255, 255, 0.4);
     --batt-low: #ff453a;
+    --segment-on: rgba(255, 255, 255, 0.24);
+    --segment-on-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   }
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 html, body {
   margin: 0;
@@ -112,12 +117,14 @@ hr {
 .subtitle { font-size: 11px; color: var(--text-secondary); }
 
 /* Battery */
+/* Fixed-width columns centred as a group, so two buds (no case) stay centred. */
 .battery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  justify-content: center;
   padding: 4px 10px 8px;
 }
 .bud {
+  width: 88px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -189,7 +196,8 @@ hr {
 /* Noise Control: three options side by side, icon above label. */
 .options {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: 2px;
   padding: 4px 8px 6px;
 }
@@ -223,3 +231,74 @@ hr {
   background: var(--accent);
   color: #fff;
 }
+
+
+/* Noise-cancellation intensity: macOS-style segmented control */
+.strength { padding: 2px 0 6px; }
+
+.segmented {
+  display: flex;
+  gap: 2px;
+  margin: 2px 14px 0;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--chip);
+}
+
+.segment {
+  flex: 1 1 0; /* equal widths */
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: default;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.segment .sym { width: 14px; height: 12px; flex: none; }
+.segment:hover:not([aria-checked="true"]) { color: var(--text); }
+.segment:focus,
+.segment:focus-visible { outline: none; }
+.segment[aria-checked="true"] {
+  background: var(--segment-on);
+  color: var(--text);
+  box-shadow: var(--segment-on-shadow);
+}
+/* Switching: the selected segment swaps its icon for a spinner */
+.segment .spinner {
+  display: none;
+  width: 11px;
+  height: 11px;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  opacity: 0.8;
+  animation: segment-spin 0.7s linear infinite;
+}
+.segment.pending .sym { display: none; }
+.segment.pending .spinner { display: block; }
+
+@keyframes segment-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment .spinner { animation-duration: 2s; }
+}
+
+/* While a switch is in flight, the other choices dim and ignore clicks */
+#noise-section.busy .option:not([aria-checked="true"]),
+#noise-section.busy .segment:not([aria-checked="true"]) {
+  opacity: 0.45;
+  pointer-events: none;
+}
+#noise-section .option,
+#noise-section .segment { transition: opacity 150ms ease; }

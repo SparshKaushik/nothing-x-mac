@@ -30,7 +30,7 @@ function emptyState() {
     eq: initialEqState(),
     capabilities: {
       transparency: true, strengths: [], adaptive: false, bassSteps: 0, bassLevels: [],
-      inEar: false, lowLatency: false, ring: 'buds',
+      inEar: false, lowLatency: false, ring: 'buds', spatialModes: [],
       eq: { style: 'eq', presets: [], customId: null, trebleHz: 3400 },
     },
   };
@@ -146,6 +146,11 @@ class NothingDevice extends EventEmitter {
   setQuickToggle(name, on) {
     if (!this.state.connected) return;
     this.quick.setToggle(name, on, this.state.quick[name]);
+  }
+
+  // mode: 'off' | 'fixed' | 'headTracked' | … (see capabilities.spatialModes)
+  setSpatialAudio(mode) {
+    if (this.state.connected) this.quick.setSpatial(mode, this.state.quick.spatial);
   }
 
   // side: 'left' | 'right' (ignored on headphones)

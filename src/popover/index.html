@@ -116,6 +116,10 @@
             <span class="qs-icon"><i class="sym" data-sym="qsLatency"></i><span class="spinner" aria-hidden="true"></span></span>
             <span class="qs-text"><span class="qs-name">Low Latency</span><span class="qs-state">Off</span></span>
           </button>
+          <button class="qs-tile" id="qs-spatial" aria-expanded="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsSpatial"></i><span class="spinner" aria-hidden="true"></span></span>
+            <span class="qs-text"><span class="qs-name">Spatial Audio</span><span class="qs-state">Off</span></span>
+          </button>
           <button class="qs-tile" id="qs-find" aria-expanded="false">
             <span class="qs-icon"><i class="sym" data-sym="qsFind"></i></span>
             <span class="qs-text"><span class="qs-name">Find Buds</span><span class="qs-state">Play sound</span></span>
@@ -123,6 +127,9 @@
         </div>
 
         <!-- Find my earbuds: per-bud buttons (earbuds) -->
+        <!-- Spatial audio modes, for models with more than On/Off -->
+        <div class="qs-list" id="qs-spatial-list" role="radiogroup" aria-label="Spatial audio mode" hidden></div>
+
         <div class="qs-find" id="qs-find-panel" hidden>
           <p class="qs-note">The sound is loud. Take the earbuds out first.</p>
           <div class="qs-find-buttons">
@@ -182,6 +189,7 @@
     <script src="strength-control.js"></script>
     <script src="bass-control.js"></script>
     <script src="quick-settings.js"></script>
+    <script src="spatial-audio.js"></script>
     <script src="equalizer.js"></script>
     <script src="renderer.js"></script>
   </body>

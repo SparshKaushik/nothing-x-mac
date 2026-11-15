@@ -20,6 +20,12 @@ const Command = {
   SET_LISTENING_MODE: 0xf01d,
   GET_CUSTOM_EQ: 0xc044,
   SET_CUSTOM_EQ: 0xf041,
+  GET_SPATIAL_AUDIO: 0xc04f,
+  SET_SPATIAL_AUDIO: 0xf052,
+  GET_DUAL_ENABLE: 0xc027,
+  SET_DUAL_ENABLE: 0xf01a,
+  GET_DUAL_LIST: 0xc028,
+  SET_DUAL_CONNECT: 0xf01b,
 };
 
 // Frames the earbuds send back (replies and unsolicited updates).
@@ -32,6 +38,10 @@ const Response = {
   FIRMWARE: [0x4042],
   EQ_PRESET: [0x401f, 0x4050], // reply to GET_EQ / GET_LISTENING_MODE
   CUSTOM_EQ: [0x4044],
+  SPATIAL_AUDIO: [0x404f],
+  DUAL_ENABLE: [0x4027],
+  DUAL_LIST: [0x4028],
+  DUAL_DEVICE_EVENT: [0xe00e], // a remembered device connected or disconnected
 };
 
 // ---- Battery ----------------------------------------------------------------
@@ -180,7 +190,87 @@ function encodeCustomEq({ bass, mid, treble }, trebleHz) {
   return [...buf];
 }
 
+// ---- Spatial audio ----------------------------------------------------------
+
+// Each mode is a (mode, head) pair on the wire. `bit` is the flag in a model's
+// spatial capability mask that says the mode exists (Off is always available).
+const SPATIAL_MODES = [
+  { key: 'off', label: 'Off', bit: null, mode: 0, head: 0 },
+  { key: 'headTracked', label: 'Head Tracked', bit: 0x01, mode: 1, head: 1 },
+  { key: 'fixed', label: 'Fixed', bit: 0x02, mode: 1, head: 0 },
+  { key: 'concert', label: 'Concert', bit: 0x08, mode: 2, head: 0 },
+  { key: 'theatre', label: 'Theatre', bit: 0x10, mode: 3, head: 0 },
+  { key: 'game', label: 'Game', bit: 0x20, mode: 4, head: 0 },
+];
+
+// Modes a model supports, from its capability mask. [] = no spatial audio.
+function spatialModesForMask(mask) {
+  if (!mask) return [];
+  return SPATIAL_MODES.filter((m) => m.bit === null || (mask & m.bit)).map(({ key, label }) => ({ key, label }));
+}
+
+// payload: [mode, head] -> mode key
+function decodeSpatialAudio(payload) {
+  const mode = payload[0] ?? 0;
+  const head = payload[1] ?? 0;
+  if (head === 1) return 'headTracked';
+  return SPATIAL_MODES.find((m) => m.head === 0 && m.mode === mode)?.key ?? 'off';
+}
+
+function encodeSpatialAudio(key) {
+  const entry = SPATIAL_MODES.find((m) => m.key === key) ?? SPATIAL_MODES[0];
+  return [entry.mode, entry.head];
+}
+
+// ---- Dual connection --------------------------------------------------------
+
+// MAC addresses are shown and compared as "AA-BB-CC-DD-EE-FF".
+const macFromBytes = (bytes) => [...bytes].map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join('-');
+const macToBytes = (mac) => mac.split(/[-:]/).map((h) => parseInt(h, 16));
+
+const decodeDualEnable = (payload) => payload[0] === 1;
+const encodeDualEnable = (on) => [on ? 0x01 : 0x00];
+
+// Remembered devices, one page per request.
+//   payload: [?, ?, count, (flags, mac×6, nameLength, name…) × count]
+//   flags: high nibble set = this device (the Mac), low nibble set = connected
+function decodeDualList(payload) {
+  const devices = [];
+  const count = payload[2] ?? 0;
+  let at = 3;
+  for (let i = 0; i < count && at + 8 <= payload.length; i++) {
+    const flags = payload[at];
+    const nameLength = payload[at + 7] & 0x7f;
+    devices.push({
+      mac: macFromBytes(payload.slice(at + 1, at + 7)),
+      name: Buffer.from(payload.slice(at + 8, at + 8 + nameLength)).toString('utf8'),
+      isSelf: (flags & 0xf0) !== 0,
+      isConnected: (flags & 0x0f) !== 0,
+    });
+    at += 8 + nameLength;
+  }
+  return devices;
+}
+// Request the page starting at device index `start`.
+const encodeDualListRequest = (start) => [start & 0xff];
+
+// payload: [connected, mac×6]
+const decodeDualDeviceEvent = (payload) => ({
+  isConnected: payload[0] === 1,
+  mac: macFromBytes(payload.slice(1, 7)),
+});
+const encodeDualConnect = (mac, connect) => [connect ? 0x01 : 0x00, ...macToBytes(mac)];
+
 module.exports = {
+  decodeDualEnable,
+  encodeDualEnable,
+  decodeDualList,
+  encodeDualListRequest,
+  decodeDualDeviceEvent,
+  encodeDualConnect,
+  spatialModesForMask,
+  decodeSpatialAudio,
+  encodeSpatialAudio,
   Command,
   Response,
   decodePreset,

@@ -1,5 +1,5 @@
-// Quick settings: in-ear detection, low latency mode, find my earbuds and
-// firmware version.
+// Quick settings: in-ear detection, low latency mode, spatial audio, find my
+// earbuds and firmware version.
 //
 // Owns the `quick` slice of device state. The device passes in how to send
 // commands and how to publish state changes, and forwards incoming frames.
@@ -7,7 +7,7 @@
 const {
   Command, Response,
   decodeInEar, encodeInEar, decodeLowLatency, encodeLowLatency,
-  decodeFirmware, encodeRing,
+  decodeFirmware, encodeRing, decodeSpatialAudio, encodeSpatialAudio,
 } = require('./commands');
 const { ConfirmedSetting } = require('./confirmed-setting');
 
@@ -30,7 +30,8 @@ function initialQuickState() {
   return {
     inEar: null, // true/false once read; null if unknown or unsupported
     lowLatency: null,
-    pending: { inEar: false, lowLatency: false },
+    spatial: null, // spatial audio mode key ('off', 'fixed', …) once read
+    pending: { inEar: false, lowLatency: false, spatial: false },
     firmware: null,
     ringing: null, // 'left' | 'right' | 'all' while a find sound is playing
   };
@@ -44,7 +45,7 @@ class QuickSettings {
     this.capabilities = capabilities;
     this.ringTimer = null;
     this.ringSide = null;
-    this.pendingFlags = { inEar: false, lowLatency: false };
+    this.pendingFlags = { inEar: false, lowLatency: false, spatial: false };
 
     this.confirm = {};
     for (const [name, spec] of Object.entries(TOGGLES)) {
@@ -54,6 +55,11 @@ class QuickSettings {
         onTimeout: () => this.#setPending(name, false),
       });
     }
+    this.confirm.spatial = new ConfirmedSetting({
+      read: () => this.send(Command.GET_SPATIAL_AUDIO),
+      matches: (report, target) => report === target,
+      onTimeout: () => this.#setPending('spatial', false),
+    });
   }
 
   // Read everything this model supports, staggered so the buds aren't flooded.
@@ -62,6 +68,7 @@ class QuickSettings {
     const reads = [Command.GET_FIRMWARE];
     if (caps.inEar) reads.push(Command.GET_IN_EAR);
     if (caps.lowLatency) reads.push(Command.GET_LOW_LATENCY);
+    if (caps.spatialModes.length) reads.push(Command.GET_SPATIAL_AUDIO);
     reads.forEach((command, i) => setTimeout(() => this.send(command), startDelayMs + i * READ_GAP_MS));
   }
 
@@ -76,6 +83,14 @@ class QuickSettings {
         }
         return true;
       }
+    }
+    if (Response.SPATIAL_AUDIO.includes(frame.command)) {
+      const mode = decodeSpatialAudio(frame.payload);
+      if (this.confirm.spatial.accept(mode)) {
+        this.pendingFlags.spatial = false;
+        this.patch({ spatial: mode, pending: { ...this.pendingFlags } });
+      }
+      return true;
     }
     if (Response.FIRMWARE.includes(frame.command)) {
       this.patch({ firmware: decodeFirmware(frame.payload) || null });
@@ -92,6 +107,16 @@ class QuickSettings {
     this.confirm[name].begin(on);
     this.pendingFlags[name] = true;
     this.patch({ [name]: on, pending: { ...this.pendingFlags } });
+  }
+
+  // mode: a key from capabilities.spatialModes. Ignored while a change is in flight.
+  setSpatial(mode, current) {
+    const modes = this.capabilities().spatialModes;
+    if (!modes.some((m) => m.key === mode) || this.confirm.spatial.pending || current === mode) return;
+    this.send(Command.SET_SPATIAL_AUDIO, encodeSpatialAudio(mode));
+    this.confirm.spatial.begin(mode);
+    this.pendingFlags.spatial = true;
+    this.patch({ spatial: mode, pending: { ...this.pendingFlags } });
   }
 
   // side: 'left' | 'right' for buds; ignored for headphone/single styles.
@@ -113,7 +138,7 @@ class QuickSettings {
     for (const c of Object.values(this.confirm)) c.reset();
     clearTimeout(this.ringTimer);
     this.ringSide = null;
-    this.pendingFlags = { inEar: false, lowLatency: false };
+    this.pendingFlags = { inEar: false, lowLatency: false, spatial: false };
   }
 
   #stopRing() {

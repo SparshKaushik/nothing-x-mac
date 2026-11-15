@@ -22,6 +22,7 @@ const POPOVER_SYMBOLS = {
   qsInEar: 'ear',
   qsLatency: 'bolt.fill',
   qsFind: 'speaker.wave.2.fill',
+  qsSpatial: 'person.spatialaudio.fill',
   equalizer: 'slider.vertical.3',
   // Equalizer preset tiles (keys match eq-presets.js)
   eq_balanced: 'equal.circle',

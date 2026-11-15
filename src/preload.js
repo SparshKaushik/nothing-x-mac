@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('nx', {
   setBass: (change) => ipcRenderer.send('device:set-bass', change),
   setQuickToggle: (name, on) => ipcRenderer.send('device:set-quick-toggle', name, on),
   ring: (side, on) => ipcRenderer.send('device:ring', side, on),
+  setSpatialAudio: (mode) => ipcRenderer.send('device:set-spatial-audio', mode),
   setEqPreset: (id) => ipcRenderer.send('device:set-eq-preset', id),
   setCustomEq: (bands) => ipcRenderer.send('device:set-custom-eq', bands),
 });

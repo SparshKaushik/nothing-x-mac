@@ -1,5 +1,6 @@
 // Quick Settings page: Control Center style tiles for in-ear detection, low
-// latency and find my earbuds, plus the firmware version.
+// latency and find my earbuds, plus the firmware version. The Spatial Audio
+// tile on the same page lives in spatial-audio.js.
 // Opened from the gear in the main header; Back or Esc returns.
 //
 // Loaded as a classic script before renderer.js; exposes one global factory.

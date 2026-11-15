@@ -18,6 +18,11 @@ const POPOVER_SYMBOLS = {
   ancAdaptive: 'sparkles',
   bassToggle: 'hifispeaker.fill',
   bassWave: 'waveform',
+  back: 'chevron.left',
+  qsInEar: 'ear',
+  qsLatency: 'bolt.fill',
+  qsFitTest: 'ear.badge.waveform',
+  qsFind: 'speaker.wave.2.fill',
 };
 
 function loadSymbol(name) {

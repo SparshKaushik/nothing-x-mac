@@ -1,5 +1,5 @@
-// High-level earbud state: connection, name, battery, noise control and bass.
-// Emits 'change' with a plain snapshot whenever anything updates.
+// High-level earbud state: connection, name, battery, noise control, bass and
+// quick settings. Emits 'change' with a plain snapshot whenever anything updates.
 
 const { EventEmitter } = require('node:events');
 const { BluetoothBridge } = require('./bridge');
@@ -9,6 +9,7 @@ const {
 } = require('./commands');
 const { capabilitiesForName, bassLevels } = require('./models');
 const { ConfirmedSetting } = require('./confirmed-setting');
+const { QuickSettings, initialQuickState } = require('./quick-settings');
 
 const BATTERY_POLL_MS = 60_000;
 const BRIDGE_RESTART_MS = 3_000;
@@ -24,8 +25,10 @@ function emptyState() {
     noisePending: false, // a noise switch was sent and isn't confirmed yet
     bass: null, // { enabled, level } once read; null if unknown or unsupported
     bassPending: false,
+    quick: initialQuickState(),
     capabilities: {
       transparency: true, strengths: [], adaptive: false, bassSteps: 0, bassLevels: [],
+      inEar: false, lowLatency: false, fitTest: false, ring: 'buds',
     },
   };
 }
@@ -51,6 +54,11 @@ class NothingDevice extends EventEmitter {
       read: () => this.#send(Command.GET_BASS),
       matches: (r, t) => r.enabled === t.enabled && (!t.enabled || r.level === t.level),
       onTimeout: () => this.#update({ bassPending: false }),
+    });
+    this.quick = new QuickSettings({
+      send: (command, payload) => this.#send(command, payload),
+      patch: (partial) => this.#update({ quick: { ...this.state.quick, ...partial } }),
+      capabilities: () => this.state.capabilities,
     });
 
     bridge.on('connected', (info) => this.#onConnected(info));
@@ -110,6 +118,23 @@ class NothingDevice extends EventEmitter {
 
   refreshBattery() {
     this.#send(Command.GET_BATTERY);
+  }
+
+  // ---- quick settings (see quick-settings.js) -------------------------------
+
+  // name: 'inEar' | 'lowLatency'
+  setQuickToggle(name, on) {
+    if (!this.state.connected) return;
+    this.quick.setToggle(name, on, this.state.quick[name]);
+  }
+
+  startFitTest() {
+    if (this.state.connected) this.quick.startFitTest();
+  }
+
+  // side: 'left' | 'right' (ignored on headphones)
+  ring(side, on) {
+    if (this.state.connected) this.quick.ring(side, on);
   }
 
   // ---- noise ----------------------------------------------------------------
@@ -182,6 +207,7 @@ class NothingDevice extends EventEmitter {
     if (capabilities.bassSteps) {
       setTimeout(() => this.#send(Command.GET_BASS), INITIAL_QUERY_GAP_MS * 2);
     }
+    this.quick.onConnected(INITIAL_QUERY_GAP_MS * 3);
 
     clearInterval(this.batteryTimer);
     this.batteryTimer = setInterval(() => this.refreshBattery(), BATTERY_POLL_MS);
@@ -205,6 +231,8 @@ class NothingDevice extends EventEmitter {
         if (report) this.#onNoiseReport(report);
       } else if (Response.BASS.includes(frame.command)) {
         if (this.state.capabilities.bassSteps) this.#onBassReport(frame.payload);
+      } else {
+        this.quick.handle(frame);
       }
     }
   }
@@ -212,6 +240,7 @@ class NothingDevice extends EventEmitter {
   #clearTimers() {
     this.noise.reset();
     this.bassSetting.reset();
+    this.quick.reset();
     clearInterval(this.batteryTimer);
     this.batteryTimer = null;
   }

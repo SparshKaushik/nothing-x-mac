@@ -11,6 +11,8 @@
   </head>
   <body>
     <div id="panel" class="panel">
+      <!-- Main view: battery, noise control, bass -->
+      <div class="view" id="view-main">
       <header class="header">
         <span class="device-badge"><i class="sym" data-sym="device"></i></span>
         <div class="header-text">
@@ -18,7 +20,7 @@
           <div class="subtitle" id="device-status">Not connected</div>
         </div>
         <div class="header-actions">
-          <button class="icon-btn" id="settings" title="Settings" aria-label="Settings">
+          <button class="icon-btn" id="settings" title="Quick Settings" aria-label="Quick Settings">
             <i class="sym" data-sym="settings"></i>
           </button>
           <button class="icon-btn" id="quit" title="Quit Nothing X Mac" aria-label="Quit Nothing X Mac">
@@ -91,12 +93,60 @@
         </div>
       </section>
       </div>
+      </div>
+
+      <!-- Quick Settings view, opened from the gear -->
+      <div class="view" id="view-settings" hidden>
+        <header class="qs-header">
+          <button class="icon-btn" id="qs-back" title="Back" aria-label="Back">
+            <i class="sym" data-sym="back"></i>
+          </button>
+          <div class="title">Quick Settings</div>
+        </header>
+
+        <div class="qs-tiles" id="qs-tiles">
+          <button class="qs-tile" id="qs-in-ear" role="switch" aria-checked="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsInEar"></i><span class="spinner" aria-hidden="true"></span></span>
+            <span class="qs-text"><span class="qs-name">In-Ear Detection</span><span class="qs-state">Off</span></span>
+          </button>
+          <button class="qs-tile" id="qs-latency" role="switch" aria-checked="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsLatency"></i><span class="spinner" aria-hidden="true"></span></span>
+            <span class="qs-text"><span class="qs-name">Low Latency</span><span class="qs-state">Off</span></span>
+          </button>
+          <button class="qs-tile" id="qs-fit-test">
+            <span class="qs-icon"><i class="sym" data-sym="qsFitTest"></i><span class="spinner" aria-hidden="true"></span></span>
+            <span class="qs-text"><span class="qs-name">Fit Test</span><span class="qs-state">Run test</span></span>
+          </button>
+          <button class="qs-tile" id="qs-find" aria-expanded="false">
+            <span class="qs-icon"><i class="sym" data-sym="qsFind"></i></span>
+            <span class="qs-text"><span class="qs-name">Find Buds</span><span class="qs-state">Play sound</span></span>
+          </button>
+        </div>
+
+        <!-- Fit test result, shown after a test -->
+        <p class="qs-note" id="qs-fit-result" hidden></p>
+
+        <!-- Find my earbuds: per-bud buttons (earbuds) -->
+        <div class="qs-find" id="qs-find-panel" hidden>
+          <p class="qs-note">The sound is loud. Take the earbuds out first.</p>
+          <div class="qs-find-buttons">
+            <button class="qs-find-btn" data-side="left">Left</button>
+            <button class="qs-find-btn" data-side="right">Right</button>
+          </div>
+        </div>
+
+        <div class="qs-footer">
+          <span>Firmware</span>
+          <span id="qs-firmware">—</span>
+        </div>
+      </div>
     </div>
 
     <script src="switch-lock.js"></script>
     <script src="segmented-control.js"></script>
     <script src="strength-control.js"></script>
     <script src="bass-control.js"></script>
+    <script src="quick-settings.js"></script>
     <script src="renderer.js"></script>
   </body>
 </html>

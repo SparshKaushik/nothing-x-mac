@@ -4,6 +4,7 @@ const LOW_BATTERY = 20;
 // Created once SF Symbols arrive from main.
 let strengthControl = null;
 let bassControl = null;
+let quickSettings = null;
 
 // One switch at a time across mode buttons and intensity segments.
 const switchLock = window.createSwitchLock({
@@ -58,6 +59,7 @@ function render(state) {
   renderNoiseMode(state.noiseMode);
   strengthControl.render(state);
   bassControl.render(state);
+  quickSettings.render(state);
 }
 
 async function main() {
@@ -75,6 +77,7 @@ async function main() {
     symbols,
     onChange: (change) => window.nx.setBass(change),
   });
+  quickSettings = window.createQuickSettings({ api: window.nx });
 
   render(device);
   window.nx.onDeviceState(render);

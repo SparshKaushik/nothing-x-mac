@@ -10,4 +10,7 @@ contextBridge.exposeInMainWorld('nx', {
   setNoiseMode: (mode) => ipcRenderer.send('device:set-noise-mode', mode),
   setAncStrength: (strength) => ipcRenderer.send('device:set-anc-strength', strength),
   setBass: (change) => ipcRenderer.send('device:set-bass', change),
+  setQuickToggle: (name, on) => ipcRenderer.send('device:set-quick-toggle', name, on),
+  startFitTest: () => ipcRenderer.send('device:start-fit-test'),
+  ring: (side, on) => ipcRenderer.send('device:ring', side, on),
 });

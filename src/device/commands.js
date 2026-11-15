@@ -1,5 +1,5 @@
 // Command ids and payload codecs for the features this app supports:
-// battery levels and noise control. Values referenced from ear-web.
+// battery, noise control, bass and quick settings. Values referenced from ear-web.
 
 const Command = {
   GET_BATTERY: 0xc007,
@@ -7,6 +7,13 @@ const Command = {
   SET_NOISE_MODE: 0xf00f,
   GET_BASS: 0xc04e,
   SET_BASS: 0xf051,
+  GET_IN_EAR: 0xc00e,
+  SET_IN_EAR: 0xf004,
+  GET_LOW_LATENCY: 0xc041,
+  SET_LOW_LATENCY: 0xf040,
+  GET_FIRMWARE: 0xc042,
+  START_FIT_TEST: 0xf014,
+  RING: 0xf002,
 };
 
 // Frames the earbuds send back (replies and unsolicited updates).
@@ -14,6 +21,10 @@ const Response = {
   BATTERY: [0x4007, 0xe001],
   NOISE_MODE: [0x401e, 0xe003, 0x6003],
   BASS: [0x404e],
+  IN_EAR: [0x400e],
+  LOW_LATENCY: [0x4041],
+  FIRMWARE: [0x4042],
+  FIT_TEST: [0xe00d],
 };
 
 // ---- Battery ----------------------------------------------------------------
@@ -89,6 +100,38 @@ function encodeBass(enabled, level, steps) {
   return [enabled ? 0x01 : 0x00, wire];
 }
 
+// ---- Quick settings ---------------------------------------------------------
+
+// In-ear detection. payload: [?, ?, on]
+const decodeInEar = (payload) => payload[2] === 1;
+const encodeInEar = (on) => [0x01, 0x01, on ? 0x01 : 0x00];
+
+// Low latency mode. payload: [1 = on, 2 = off]
+const decodeLowLatency = (payload) => payload[0] === 1;
+const encodeLowLatency = (on) => [on ? 0x01 : 0x02, 0x00];
+
+// Firmware version as ASCII, e.g. "1.0.3.124".
+const decodeFirmware = (payload) => String.fromCharCode(...payload).replace(/\0+$/, '').trim();
+
+// Ear tip fit test result per bud. payload: [left, right]
+const FIT_RESULT = { 0: 'good', 1: 'adjust', 2: 'not-in-ear' };
+const decodeFitTest = (payload) => ({
+  left: FIT_RESULT[payload[0]] ?? 'not-in-ear',
+  right: FIT_RESULT[payload[1]] ?? 'not-in-ear',
+});
+const encodeFitTest = () => [0x01];
+
+// Find my earbuds. Three payload styles depending on the model:
+//   'buds':      [0x02 left | 0x03 right, on]
+//   'headphone': [0x06, on]       (one sound for the whole device)
+//   'single':    [on]             (Nothing ear (1))
+function encodeRing(style, side, on) {
+  const flag = on ? 0x01 : 0x00;
+  if (style === 'single') return [flag];
+  if (style === 'headphone') return [0x06, flag];
+  return [side === 'left' ? 0x02 : 0x03, flag];
+}
+
 module.exports = {
   Command,
   Response,
@@ -97,4 +140,12 @@ module.exports = {
   encodeNoiseMode,
   decodeBass,
   encodeBass,
+  decodeInEar,
+  encodeInEar,
+  decodeLowLatency,
+  encodeLowLatency,
+  decodeFirmware,
+  decodeFitTest,
+  encodeFitTest,
+  encodeRing,
 };

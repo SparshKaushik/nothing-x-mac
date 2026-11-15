@@ -96,6 +96,9 @@ ipcMain.handle('popover:init', () => ({
 ipcMain.on('device:set-noise-mode', (_e, mode) => device.setNoiseMode(mode));
 ipcMain.on('device:set-anc-strength', (_e, strength) => device.setAncStrength(strength));
 ipcMain.on('device:set-bass', (_e, change) => device.setBass(change));
+ipcMain.on('device:set-quick-toggle', (_e, name, on) => device.setQuickToggle(name, on));
+ipcMain.on('device:start-fit-test', () => device.startFitTest());
+ipcMain.on('device:ring', (_e, side, on) => device.ring(side, on));
 
 device.on('change', (state) => {
   if (popover && !popover.isDestroyed()) popover.webContents.send('device:state', state);

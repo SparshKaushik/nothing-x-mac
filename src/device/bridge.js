@@ -6,6 +6,8 @@ const { EventEmitter } = require('node:events');
 const readline = require('node:readline');
 const path = require('node:path');
 
+const STOP_TIMEOUT_MS = 2_000;
+
 function bridgeBinaryPath() {
   // Packaged builds should ship the helper under Resources; dev uses build/.
   const { app } = require('electron');
@@ -36,12 +38,20 @@ class BluetoothBridge extends EventEmitter {
     });
   }
 
+  // Ask the helper to close its Bluetooth channel and exit. Killing it outright
+  // leaves the channel open on the earbuds, which blocks the next connection.
   stop() {
     if (!this.child) return;
     const child = this.child;
     this.child = null;
-    child.stdin.end();
-    child.kill();
+    try {
+      child.stdin.write(`${JSON.stringify({ type: 'quit' })}\n`);
+      child.stdin.end();
+    } catch {
+      // stdin already closed; the helper sees EOF and shuts down anyway
+    }
+    const forceKill = setTimeout(() => child.kill('SIGKILL'), STOP_TIMEOUT_MS);
+    child.once('exit', () => clearTimeout(forceKill));
   }
 
   write(bytes) {

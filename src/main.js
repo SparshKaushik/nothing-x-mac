@@ -3,6 +3,7 @@ const {
 } = require('electron');
 const path = require('node:path');
 const { popoverSymbolDataUrls, trayIcon } = require('./symbols');
+const { NothingDevice } = require('./device/nothing-device');
 
 const APP_NAME = 'Nothing X Mac';
 const POPOVER_WIDTH = 300;
@@ -10,6 +11,7 @@ const POPOVER_WIDTH = 300;
 let tray = null;
 let popover = null;
 let lastHiddenAt = 0;
+const device = new NothingDevice();
 
 function accentColor() {
   // RRGGBBAA -> #RRGGBB
@@ -64,6 +66,7 @@ function positionPopover() {
 }
 
 function showPopover() {
+  device.refreshBattery();
   positionPopover();
   popover.show();
   popover.focus();
@@ -87,7 +90,15 @@ ipcMain.handle('popover:init', () => ({
   appName: APP_NAME,
   accent: accentColor(),
   symbols: popoverSymbolDataUrls(),
+  device: device.getState(),
 }));
+
+ipcMain.on('device:set-noise-mode', (_e, mode) => device.setNoiseMode(mode));
+
+device.on('change', (state) => {
+  if (popover && !popover.isDestroyed()) popover.webContents.send('device:state', state);
+  if (tray) tray.setToolTip(state.connected ? `${APP_NAME} · ${state.name}` : APP_NAME);
+});
 
 ipcMain.on('popover:set-height', (_e, height) => {
   const h = Math.ceil(Math.max(100, Math.min(height, 800)));
@@ -101,6 +112,7 @@ app.whenReady().then(() => {
   if (process.platform === 'darwin') app.dock.hide();
 
   createPopover();
+  device.start();
 
   tray = new Tray(trayIcon());
   tray.setToolTip(APP_NAME);
@@ -121,3 +133,4 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', (e) => e.preventDefault());
+app.on('before-quit', () => device.stop());

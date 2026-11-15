@@ -1,13 +1,8 @@
-// UI only for now: battery levels and noise mode are placeholder state.
-const state = {
-  deviceName: 'Nothing Ear',
-  battery: {
-    left: { level: 82, charging: false },
-    right: { level: 76, charging: false },
-    case: { level: 54, charging: true },
-  },
-  noiseMode: 'anc',
-};
+// Popover view: renders device state pushed from the main process.
+
+const LOW_BATTERY = 20;
+
+const $ = (sel) => document.querySelector(sel);
 
 function applySymbols(symbols) {
   for (const el of document.querySelectorAll('[data-sym]')) {
@@ -16,46 +11,57 @@ function applySymbols(symbols) {
   }
 }
 
-function renderBattery() {
-  for (const [part, { level, charging }] of Object.entries(state.battery)) {
-    const el = document.querySelector(`.bud[data-part="${part}"]`);
-    el.querySelector('.pct').textContent = `${level}%`;
-    el.querySelector('.fill').style.width = `${level}%`;
-    el.classList.toggle('low', level <= 20 && !charging);
-    el.classList.toggle('charging', charging);
+function renderHeader(state) {
+  $('#panel').classList.toggle('disconnected', !state.connected);
+  $('#device-name').textContent = state.connected ? state.name : 'No Earbuds';
+  $('#device-status').textContent = state.connected ? 'Connected' : 'Not connected';
+}
+
+function renderBattery(battery) {
+  for (const part of ['left', 'right', 'case']) {
+    const el = $(`.bud[data-part="${part}"]`);
+    const info = battery[part];
+    el.classList.toggle('unavailable', !info);
+    el.classList.toggle('charging', Boolean(info?.charging));
+    el.classList.toggle('low', Boolean(info && !info.charging && info.level <= LOW_BATTERY));
+    el.querySelector('.pct').textContent = info ? `${info.level}%` : '—';
+    el.querySelector('.fill').style.width = info ? `${info.level}%` : '0';
   }
 }
 
-function renderNoiseMode() {
+function renderNoiseMode(mode) {
   for (const btn of document.querySelectorAll('.option')) {
-    btn.setAttribute('aria-checked', String(btn.dataset.mode === state.noiseMode));
+    btn.setAttribute('aria-checked', String(btn.dataset.mode === mode));
   }
 }
 
-function reportHeight() {
-  window.nx.setHeight(document.getElementById('panel').getBoundingClientRect().height);
+function render(state) {
+  renderHeader(state);
+  renderBattery(state.battery);
+  renderNoiseMode(state.noiseMode);
 }
 
 async function main() {
-  const { accent, symbols } = await window.nx.init();
+  const { accent, symbols, device } = await window.nx.init();
   document.documentElement.style.setProperty('--accent', accent);
   window.nx.onAccent((c) => document.documentElement.style.setProperty('--accent', c));
-
   applySymbols(symbols);
-  document.getElementById('device-name').textContent = state.deviceName;
-  renderBattery();
-  renderNoiseMode();
 
-  document.getElementById('noise-options').addEventListener('click', (e) => {
+  render(device);
+  window.nx.onDeviceState(render);
+
+  $('#noise-options').addEventListener('click', (e) => {
     const btn = e.target.closest('.option');
     if (!btn) return;
-    state.noiseMode = btn.dataset.mode;
-    renderNoiseMode();
+    renderNoiseMode(btn.dataset.mode); // optimistic; device state confirms
+    window.nx.setNoiseMode(btn.dataset.mode);
   });
 
-  document.getElementById('quit').addEventListener('click', () => window.nx.quit());
+  $('#quit').addEventListener('click', () => window.nx.quit());
 
-  reportHeight();
+  // Keep the window sized to the content as states change.
+  const panel = $('#panel');
+  new ResizeObserver(() => window.nx.setHeight(panel.getBoundingClientRect().height)).observe(panel);
 }
 
 main();

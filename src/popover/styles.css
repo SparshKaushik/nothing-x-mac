@@ -95,6 +95,20 @@ hr {
 .icon-btn:focus,
 .icon-btn:focus-visible { outline: none; }
 .title { font-weight: 600; }
+
+/* Connection states */
+.empty {
+  margin: 2px 14px 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.panel:not(.disconnected) .empty,
+.panel.disconnected .connected-only { display: none; }
+.panel.disconnected .device-badge { background: var(--chip); color: var(--text-secondary); }
+
+/* A part the earbuds didn't report (e.g. bud in a closed case). */
+.bud.unavailable { opacity: 0.35; }
+.bud.unavailable .batt { visibility: hidden; }
 .subtitle { font-size: 11px; color: var(--text-secondary); }
 
 /* Battery */

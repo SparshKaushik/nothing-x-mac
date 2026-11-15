@@ -14,8 +14,8 @@
       <header class="header">
         <span class="device-badge"><i class="sym" data-sym="device"></i></span>
         <div class="header-text">
-          <div class="title" id="device-name">Nothing Ear</div>
-          <div class="subtitle">Connected</div>
+          <div class="title" id="device-name">No Earbuds</div>
+          <div class="subtitle" id="device-status">Not connected</div>
         </div>
         <div class="header-actions">
           <button class="icon-btn" id="settings" title="Settings" aria-label="Settings">
@@ -27,6 +27,11 @@
         </div>
       </header>
 
+      <p class="empty" id="empty-message">
+        Connect your Nothing or CMF earbuds in Bluetooth settings.
+      </p>
+
+      <div class="connected-only">
       <section class="battery" aria-label="Battery">
         <div class="bud" data-part="left">
           <i class="sym bud-icon" data-sym="budLeft"></i>
@@ -64,6 +69,7 @@
           </button>
         </div>
       </section>
+      </div>
     </div>
 
     <script src="renderer.js"></script>

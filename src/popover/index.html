@@ -162,6 +162,36 @@
         </div>
       </div>
 
+      <!-- Controls view (gestures), opened by clicking the left or right bud in the battery row -->
+      <div class="view" id="view-controls" hidden>
+        <header class="qs-header">
+          <button class="icon-btn" id="controls-back" title="Back" aria-label="Back">
+            <i class="sym" data-sym="back"></i>
+          </button>
+          <div class="title">Controls</div>
+        </header>
+
+        <div class="bud-picker" role="radiogroup" aria-label="Earbud">
+          <button class="bud-card" data-side="left" role="radio">
+            <i class="sym bud-card-icon" data-sym="budLeft"></i>
+            <span>Left</span>
+          </button>
+          <button class="bud-card" data-side="right" role="radio">
+            <i class="sym bud-card-icon" data-sym="budRight"></i>
+            <span>Right</span>
+          </button>
+        </div>
+
+        <div class="group-title" id="controls-side-title">Left Earbud</div>
+        <div class="group" id="controls-gestures"></div>
+
+        <div id="controls-noise" hidden>
+          <div class="group-title">Noise Control</div>
+          <div class="group" id="controls-noise-modes"></div>
+          <p class="group-footer">Tap and hold switches between these. Choose at least two.</p>
+        </div>
+      </div>
+
       <!-- Equalizer view, opened from the equalizer button -->
       <div class="view" id="view-eq" hidden>
         <header class="qs-header">
@@ -209,6 +239,7 @@
     <script src="quick-settings.js"></script>
     <script src="spatial-audio.js"></script>
     <script src="dual-connection.js"></script>
+    <script src="controls.js"></script>
     <script src="equalizer.js"></script>
     <script src="renderer.js"></script>
   </body>

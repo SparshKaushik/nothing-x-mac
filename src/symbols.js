@@ -25,6 +25,7 @@ const POPOVER_SYMBOLS = {
   qsSpatial: 'person.spatialaudio.fill',
   qsPersonalSound: 'waveform.and.person.filled',
   qsDual: 'macbook.and.iphone',
+  popUpChevrons: 'chevron.up.chevron.down',
   // Dual connection device rows (guessed from the device name)
   dev_laptop: 'laptopcomputer',
   dev_phone: 'iphone',

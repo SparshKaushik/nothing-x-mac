@@ -31,6 +31,8 @@ const Command = {
   SET_MIMI: 0xf015,
   GET_AUDIODO: 0xc05a,
   SET_AUDIODO: 0xf05c,
+  GET_GESTURES: 0xc018,
+  SET_GESTURE: 0xf003,
 };
 
 // Frames the earbuds send back (replies and unsolicited updates).
@@ -49,6 +51,7 @@ const Response = {
   DUAL_DEVICE_EVENT: [0xe00e], // a remembered device connected or disconnected
   MIMI: [0x4022],
   AUDIODO: [0x405a, 0xe019, 0x6019], // reply, plus pushes when it changes on the buds
+  GESTURES: [0x4018],
 };
 
 // ---- Battery ----------------------------------------------------------------
@@ -274,7 +277,26 @@ const encodeDualConnect = (mac, connect) => [connect ? 0x01 : 0x00, ...macToByte
 const decodePersonalSound = (payload) => payload[0] === 1;
 const encodePersonalSound = (on) => [on ? 0x01 : 0x00];
 
+// ---- Gestures ---------------------------------------------------------------
+
+// payload: [count, (device, button, gestureType, action) × count]
+function decodeGestures(payload) {
+  const records = [];
+  const count = payload[0] ?? 0;
+  for (let i = 0; i < count; i++) {
+    const at = 1 + i * 4;
+    if (at + 3 >= payload.length) break;
+    records.push({ device: payload[at], button: payload[at + 1], type: payload[at + 2], action: payload[at + 3] });
+  }
+  return records;
+}
+
+// One gesture: [1, device, button, gestureType, action]
+const encodeGesture = (device, type, action, button = 0x01) => [0x01, device, button, type, action];
+
 module.exports = {
+  decodeGestures,
+  encodeGesture,
   decodePersonalSound,
   encodePersonalSound,
   decodeDualEnable,

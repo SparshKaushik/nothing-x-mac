@@ -1,5 +1,5 @@
 // High-level earbud state: connection, name, battery, noise control, bass,
-// equalizer, quick settings and dual connection. Emits 'change' with a plain snapshot whenever anything updates.
+// equalizer, quick settings, dual connection and gestures. Emits 'change' with a plain snapshot whenever anything updates.
 
 const { EventEmitter } = require('node:events');
 const { BluetoothBridge } = require('./bridge');
@@ -12,6 +12,7 @@ const { ConfirmedSetting } = require('./confirmed-setting');
 const { QuickSettings, initialQuickState } = require('./quick-settings');
 const { Equalizer, initialEqState } = require('./equalizer');
 const { DualConnection, initialDualState } = require('./dual-connection');
+const { Gestures, initialGestureState } = require('./gestures');
 
 const BATTERY_POLL_MS = 60_000;
 const BRIDGE_RESTART_MS = 3_000;
@@ -30,10 +31,11 @@ function emptyState() {
     quick: initialQuickState(),
     eq: initialEqState(),
     dual: initialDualState(),
+    gestures: initialGestureState(),
     capabilities: {
       transparency: true, strengths: [], adaptive: false, bassSteps: 0, bassLevels: [],
       inEar: false, lowLatency: false, ring: 'buds', spatialModes: [],
-      dualConnection: false, dualRestarts: false, personalSound: null,
+      dualConnection: false, dualRestarts: false, personalSound: null, gestures: null,
       eq: { style: 'eq', presets: [], customId: null, trebleHz: 3400 },
     },
   };
@@ -77,6 +79,12 @@ class NothingDevice extends EventEmitter {
       patch: (partial) => this.#update({ dual: { ...this.state.dual, ...partial } }),
       capabilities: () => this.state.capabilities,
       state: () => this.state.dual,
+    });
+    this.gestures = new Gestures({
+      send: (command, payload) => this.#send(command, payload),
+      patch: (partial) => this.#update({ gestures: { ...this.state.gestures, ...partial } }),
+      capabilities: () => this.state.capabilities,
+      state: () => this.state.gestures,
     });
 
     bridge.on('connected', (info) => this.#onConnected(info));
@@ -157,6 +165,18 @@ class NothingDevice extends EventEmitter {
 
   setDualDeviceConnected(mac, connect) {
     if (this.state.connected) this.dual.setDeviceConnected(mac, connect);
+  }
+
+  // ---- gestures (see gestures.js) -------------------------------------------
+
+  // side: 'left' | 'right'; value: action code or 'noise'
+  setGesture(side, slotKey, value) {
+    if (this.state.connected) this.gestures.setAction(side, slotKey, value);
+  }
+
+  // cycle: { anc, transparency, off }
+  setGestureNoiseCycle(side, slotKey, cycle) {
+    if (this.state.connected) this.gestures.setNoiseCycle(side, slotKey, cycle);
   }
 
   // ---- quick settings (see quick-settings.js) -------------------------------
@@ -250,6 +270,7 @@ class NothingDevice extends EventEmitter {
     this.quick.onConnected(INITIAL_QUERY_GAP_MS * 3);
     this.equalizer.onConnected(INITIAL_QUERY_GAP_MS * 7);
     this.dual.onConnected(INITIAL_QUERY_GAP_MS * 9);
+    this.gestures.onConnected(INITIAL_QUERY_GAP_MS * 11);
 
     clearInterval(this.batteryTimer);
     this.batteryTimer = setInterval(() => this.refreshBattery(), BATTERY_POLL_MS);
@@ -273,7 +294,7 @@ class NothingDevice extends EventEmitter {
         if (report) this.#onNoiseReport(report);
       } else if (Response.BASS.includes(frame.command)) {
         if (this.state.capabilities.bassSteps) this.#onBassReport(frame.payload);
-      } else if (!this.equalizer.handle(frame) && !this.dual.handle(frame)) {
+      } else if (!this.equalizer.handle(frame) && !this.dual.handle(frame) && !this.gestures.handle(frame)) {
         this.quick.handle(frame);
       }
     }
@@ -285,6 +306,7 @@ class NothingDevice extends EventEmitter {
     this.quick.reset();
     this.equalizer.reset();
     this.dual.reset();
+    this.gestures.reset();
     clearInterval(this.batteryTimer);
     this.batteryTimer = null;
   }

@@ -15,6 +15,10 @@ contextBridge.exposeInMainWorld('nx', {
   setSpatialAudio: (mode) => ipcRenderer.send('device:set-spatial-audio', mode),
   setDualConnection: (on) => ipcRenderer.send('device:set-dual-connection', on),
   setDualDevice: (mac, connect) => ipcRenderer.send('device:set-dual-device', mac, connect),
+  setGesture: (side, slot, value) => ipcRenderer.send('device:set-gesture', side, slot, value),
+  setGestureNoiseCycle: (side, slot, cycle) => ipcRenderer.send('device:set-gesture-noise-cycle', side, slot, cycle),
+  // Native pop-up menu; resolves with the chosen item's value or null.
+  popupMenu: (items, x, y) => ipcRenderer.invoke('menu:popup', { items, x, y }),
   setEqPreset: (id) => ipcRenderer.send('device:set-eq-preset', id),
   setCustomEq: (bands) => ipcRenderer.send('device:set-custom-eq', bands),
 });

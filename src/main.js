@@ -13,6 +13,8 @@ const POPOVER_WIDTH = 300;
 let tray = null;
 let popover = null;
 let lastHiddenAt = 0;
+// True while a native pop-up menu from the panel is open (it shouldn't close the panel).
+let popupMenuOpen = false;
 const device = new NothingDevice();
 
 function accentColor() {
@@ -49,7 +51,7 @@ function createPopover() {
   popover.loadFile(path.join(__dirname, 'popover', 'index.html'));
 
   popover.on('blur', () => {
-    if (!popover.webContents.isDevToolsOpened()) hidePopover();
+    if (!popover.webContents.isDevToolsOpened() && !popupMenuOpen) hidePopover();
   });
 }
 
@@ -103,6 +105,32 @@ ipcMain.on('device:ring', (_e, side, on) => device.ring(side, on));
 ipcMain.on('device:set-spatial-audio', (_e, mode) => device.setSpatialAudio(mode));
 ipcMain.on('device:set-dual-connection', (_e, on) => device.setDualConnection(on));
 ipcMain.on('device:set-dual-device', (_e, mac, connect) => device.setDualDeviceConnected(mac, connect));
+ipcMain.on('device:set-gesture', (_e, side, slot, value) => device.setGesture(side, slot, value));
+ipcMain.on('device:set-gesture-noise-cycle', (_e, side, slot, cycle) => device.setGestureNoiseCycle(side, slot, cycle));
+
+// Native macOS pop-up menu for the panel's pop-up buttons.
+// items: [{ label, value, checked }], x/y: where to open it, in panel coordinates.
+// Resolves with the chosen value, or null if the menu was dismissed.
+ipcMain.handle('menu:popup', (_e, { items, x, y }) => new Promise((resolve) => {
+  let chosen = null;
+  const menu = Menu.buildFromTemplate(items.map((item) => ({
+    label: item.label,
+    type: 'checkbox',
+    checked: Boolean(item.checked),
+    click: () => { chosen = item.value; },
+  })));
+  popupMenuOpen = true;
+  menu.popup({
+    window: popover,
+    x: Math.round(x),
+    y: Math.round(y),
+    // The click handler runs before the menu reports it closed.
+    callback: () => setTimeout(() => {
+      popupMenuOpen = false;
+      resolve(chosen);
+    }, 0),
+  });
+}));
 ipcMain.on('device:set-eq-preset', (_e, id) => device.setEqPreset(id));
 ipcMain.on('device:set-custom-eq', (_e, bands) => device.setCustomEq(bands));
 

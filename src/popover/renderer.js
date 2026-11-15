@@ -7,6 +7,7 @@ let bassControl = null;
 let quickSettings = null;
 let spatialAudio = null;
 let dualConnection = null;
+let controls = null;
 let equalizer = null;
 
 // One switch at a time across mode buttons and intensity segments.
@@ -65,6 +66,7 @@ function render(state) {
   quickSettings.render(state);
   spatialAudio.render(state);
   dualConnection.render(state);
+  controls.render(state);
   equalizer.render(state);
 }
 
@@ -87,6 +89,7 @@ async function main() {
   quickSettings = window.createQuickSettings({ api: window.nx, views });
   spatialAudio = window.createSpatialAudioTile({ api: window.nx, views });
   dualConnection = window.createDualConnectionTile({ api: window.nx, symbols });
+  controls = window.createControls({ api: window.nx, views, symbols });
   equalizer = window.createEqualizer({ api: window.nx, views, symbols });
 
   render(device);

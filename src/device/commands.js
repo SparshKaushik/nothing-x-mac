@@ -5,12 +5,15 @@ const Command = {
   GET_BATTERY: 0xc007,
   GET_NOISE_MODE: 0xc01e,
   SET_NOISE_MODE: 0xf00f,
+  GET_BASS: 0xc04e,
+  SET_BASS: 0xf051,
 };
 
 // Frames the earbuds send back (replies and unsolicited updates).
 const Response = {
   BATTERY: [0x4007, 0xe001],
   NOISE_MODE: [0x401e, 0xe003, 0x6003],
+  BASS: [0x404e],
 };
 
 // ---- Battery ----------------------------------------------------------------
@@ -60,10 +63,38 @@ function encodeNoiseMode(mode, strength = 'high') {
   return [0x01, entry.code, 0x00];
 }
 
+// ---- Bass enhance -----------------------------------------------------------
+
+// payload: [enabled, wireLevel]
+// Most models use 5 levels sent as level*2 (2..10). A few use 3 steps sent as
+// 0 / 5 / 10, where step 0 means off; here those become off + levels 1..2.
+const THREE_STEP_WIRE = [0, 5, 10];
+
+// -> { enabled, level, wire }. level is null if it doesn't fit the model.
+function decodeBass(payload, steps) {
+  const enabled = payload[0] === 1;
+  const wire = payload[1] ?? 0;
+  let level;
+  if (steps === 3) {
+    const index = THREE_STEP_WIRE.indexOf(wire);
+    level = index > 0 ? index : null;
+  } else {
+    level = wire >= 2 && wire <= 10 && wire % 2 === 0 ? wire / 2 : null;
+  }
+  return { enabled, level, wire };
+}
+
+function encodeBass(enabled, level, steps) {
+  const wire = steps === 3 ? THREE_STEP_WIRE[enabled ? level : 0] ?? 0 : level * 2;
+  return [enabled ? 0x01 : 0x00, wire];
+}
+
 module.exports = {
   Command,
   Response,
   decodeBattery,
   decodeNoiseMode,
   encodeNoiseMode,
+  decodeBass,
+  encodeBass,
 };

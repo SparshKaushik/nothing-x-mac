@@ -9,4 +9,5 @@ contextBridge.exposeInMainWorld('nx', {
   onDeviceState: (cb) => ipcRenderer.on('device:state', (_e, state) => cb(state)),
   setNoiseMode: (mode) => ipcRenderer.send('device:set-noise-mode', mode),
   setAncStrength: (strength) => ipcRenderer.send('device:set-anc-strength', strength),
+  setBass: (change) => ipcRenderer.send('device:set-bass', change),
 });

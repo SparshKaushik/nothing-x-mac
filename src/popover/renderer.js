@@ -1,7 +1,9 @@
 // Popover view: renders device state pushed from the main process.
 
 const LOW_BATTERY = 20;
-let strengthControl = null; // created once SF Symbols arrive from main
+// Created once SF Symbols arrive from main.
+let strengthControl = null;
+let bassControl = null;
 
 // One switch at a time across mode buttons and intensity segments.
 const switchLock = window.createSwitchLock({
@@ -55,6 +57,7 @@ function render(state) {
   switchLock.sync(state.noisePending);
   renderNoiseMode(state.noiseMode);
   strengthControl.render(state);
+  bassControl.render(state);
 }
 
 async function main() {
@@ -67,6 +70,10 @@ async function main() {
     symbols,
     lock: switchLock,
     onChange: (strength) => window.nx.setAncStrength(strength),
+  });
+  bassControl = window.createBassControl({
+    symbols,
+    onChange: (change) => window.nx.setBass(change),
   });
 
   render(device);

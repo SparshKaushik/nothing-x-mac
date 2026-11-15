@@ -16,6 +16,8 @@ const POPOVER_SYMBOLS = {
   ancMid: 'dial.medium',
   ancHigh: 'dial.high',
   ancAdaptive: 'sparkles',
+  bassToggle: 'hifispeaker.fill',
+  bassWave: 'waveform',
 };
 
 function loadSymbol(name) {

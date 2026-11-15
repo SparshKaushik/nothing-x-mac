@@ -1,5 +1,5 @@
-// Quick settings: in-ear detection, low latency mode, ear tip fit test,
-// find my earbuds and firmware version.
+// Quick settings: in-ear detection, low latency mode, find my earbuds and
+// firmware version.
 //
 // Owns the `quick` slice of device state. The device passes in how to send
 // commands and how to publish state changes, and forwards incoming frames.
@@ -7,12 +7,11 @@
 const {
   Command, Response,
   decodeInEar, encodeInEar, decodeLowLatency, encodeLowLatency,
-  decodeFirmware, decodeFitTest, encodeFitTest, encodeRing,
+  decodeFirmware, encodeRing,
 } = require('./commands');
 const { ConfirmedSetting } = require('./confirmed-setting');
 
 const READ_GAP_MS = 150;
-const FIT_TEST_TIMEOUT_MS = 20_000;
 const RING_AUTO_STOP_MS = 30_000;
 
 // On/off settings: how to read, write and decode each one.
@@ -33,7 +32,6 @@ function initialQuickState() {
     lowLatency: null,
     pending: { inEar: false, lowLatency: false },
     firmware: null,
-    fitTest: { status: 'idle', left: null, right: null }, // idle | running | done | timeout
     ringing: null, // 'left' | 'right' | 'all' while a find sound is playing
   };
 }
@@ -44,7 +42,6 @@ class QuickSettings {
     this.send = send;
     this.patch = patch;
     this.capabilities = capabilities;
-    this.fitTimer = null;
     this.ringTimer = null;
     this.ringSide = null;
     this.pendingFlags = { inEar: false, lowLatency: false };
@@ -84,11 +81,6 @@ class QuickSettings {
       this.patch({ firmware: decodeFirmware(frame.payload) || null });
       return true;
     }
-    if (Response.FIT_TEST.includes(frame.command)) {
-      clearTimeout(this.fitTimer);
-      this.patch({ fitTest: { status: 'done', ...decodeFitTest(frame.payload) } });
-      return true;
-    }
     return false;
   }
 
@@ -100,17 +92,6 @@ class QuickSettings {
     this.confirm[name].begin(on);
     this.pendingFlags[name] = true;
     this.patch({ [name]: on, pending: { ...this.pendingFlags } });
-  }
-
-  startFitTest() {
-    if (!this.capabilities().fitTest) return;
-    this.send(Command.START_FIT_TEST, encodeFitTest());
-    clearTimeout(this.fitTimer);
-    this.fitTimer = setTimeout(
-      () => this.patch({ fitTest: { status: 'timeout', left: null, right: null } }),
-      FIT_TEST_TIMEOUT_MS
-    );
-    this.patch({ fitTest: { status: 'running', left: null, right: null } });
   }
 
   // side: 'left' | 'right' for buds; ignored for headphone/single styles.
@@ -130,7 +111,6 @@ class QuickSettings {
 
   reset() {
     for (const c of Object.values(this.confirm)) c.reset();
-    clearTimeout(this.fitTimer);
     clearTimeout(this.ringTimer);
     this.ringSide = null;
     this.pendingFlags = { inEar: false, lowLatency: false };

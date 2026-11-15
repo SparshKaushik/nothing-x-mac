@@ -30,7 +30,7 @@ function emptyState() {
     eq: initialEqState(),
     capabilities: {
       transparency: true, strengths: [], adaptive: false, bassSteps: 0, bassLevels: [],
-      inEar: false, lowLatency: false, fitTest: false, ring: 'buds',
+      inEar: false, lowLatency: false, ring: 'buds',
       eq: { style: 'eq', presets: [], customId: null, trebleHz: 3400 },
     },
   };
@@ -146,10 +146,6 @@ class NothingDevice extends EventEmitter {
   setQuickToggle(name, on) {
     if (!this.state.connected) return;
     this.quick.setToggle(name, on, this.state.quick[name]);
-  }
-
-  startFitTest() {
-    if (this.state.connected) this.quick.startFitTest();
   }
 
   // side: 'left' | 'right' (ignored on headphones)

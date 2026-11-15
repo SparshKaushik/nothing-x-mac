@@ -12,7 +12,6 @@ const Command = {
   GET_LOW_LATENCY: 0xc041,
   SET_LOW_LATENCY: 0xf040,
   GET_FIRMWARE: 0xc042,
-  START_FIT_TEST: 0xf014,
   RING: 0xf002,
   // Equalizer presets: Nothing models use "EQ", CMF models "listening mode".
   GET_EQ: 0xc01f,
@@ -31,7 +30,6 @@ const Response = {
   IN_EAR: [0x400e],
   LOW_LATENCY: [0x4041],
   FIRMWARE: [0x4042],
-  FIT_TEST: [0xe00d],
   EQ_PRESET: [0x401f, 0x4050], // reply to GET_EQ / GET_LISTENING_MODE
   CUSTOM_EQ: [0x4044],
 };
@@ -122,14 +120,6 @@ const encodeLowLatency = (on) => [on ? 0x01 : 0x02, 0x00];
 // Firmware version as ASCII, e.g. "1.0.3.124".
 const decodeFirmware = (payload) => String.fromCharCode(...payload).replace(/\0+$/, '').trim();
 
-// Ear tip fit test result per bud. payload: [left, right]
-const FIT_RESULT = { 0: 'good', 1: 'adjust', 2: 'not-in-ear' };
-const decodeFitTest = (payload) => ({
-  left: FIT_RESULT[payload[0]] ?? 'not-in-ear',
-  right: FIT_RESULT[payload[1]] ?? 'not-in-ear',
-});
-const encodeFitTest = () => [0x01];
-
 // Find my earbuds. Three payload styles depending on the model:
 //   'buds':      [0x02 left | 0x03 right, on]
 //   'headphone': [0x06, on]       (one sound for the whole device)
@@ -207,7 +197,5 @@ module.exports = {
   decodeLowLatency,
   encodeLowLatency,
   decodeFirmware,
-  decodeFitTest,
-  encodeFitTest,
   encodeRing,
 };

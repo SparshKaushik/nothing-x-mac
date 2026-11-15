@@ -11,7 +11,6 @@ contextBridge.exposeInMainWorld('nx', {
   setAncStrength: (strength) => ipcRenderer.send('device:set-anc-strength', strength),
   setBass: (change) => ipcRenderer.send('device:set-bass', change),
   setQuickToggle: (name, on) => ipcRenderer.send('device:set-quick-toggle', name, on),
-  startFitTest: () => ipcRenderer.send('device:start-fit-test'),
   ring: (side, on) => ipcRenderer.send('device:ring', side, on),
   setEqPreset: (id) => ipcRenderer.send('device:set-eq-preset', id),
   setCustomEq: (bands) => ipcRenderer.send('device:set-custom-eq', bands),

@@ -21,7 +21,6 @@ const POPOVER_SYMBOLS = {
   back: 'chevron.left',
   qsInEar: 'ear',
   qsLatency: 'bolt.fill',
-  qsFitTest: 'ear.badge.waveform',
   qsFind: 'speaker.wave.2.fill',
   equalizer: 'slider.vertical.3',
   // Equalizer preset tiles (keys match eq-presets.js)

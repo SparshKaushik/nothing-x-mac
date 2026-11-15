@@ -10,6 +10,8 @@ const POPOVER_SYMBOLS = {
   transparency: 'ear.and.waveform',
   off: 'person.fill',
   bolt: 'bolt.fill',
+  settings: 'gearshape',
+  power: 'power',
 };
 
 function loadSymbol(name) {

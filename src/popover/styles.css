@@ -72,6 +72,28 @@ hr {
   color: #fff;
 }
 .device-badge .sym { width: 17px; height: 13px; }
+.header-text { flex: 1; min-width: 0; }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.icon-btn {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: default;
+}
+.icon-btn .sym { width: 15px; height: 15px; }
+.icon-btn:hover { background: var(--hover); color: var(--text); }
+.icon-btn:focus,
+.icon-btn:focus-visible { outline: none; }
 .title { font-weight: 600; }
 .subtitle { font-size: 11px; color: var(--text-secondary); }
 
@@ -149,7 +171,6 @@ hr {
 .row:hover { background: var(--hover); }
 .row:focus,
 .row:focus-visible { outline: none; }
-.row.plain { padding-top: 3px; padding-bottom: 3px; }
 
 /* Noise Control: three options side by side, icon above label. */
 .options {

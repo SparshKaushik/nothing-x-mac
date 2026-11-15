@@ -3,6 +3,7 @@ const {
 } = require('electron');
 const path = require('node:path');
 const { popoverSymbolDataUrls, trayIcon } = require('./symbols');
+const { trayLogoIcon } = require('./tray-logo');
 const { NothingDevice } = require('./device/nothing-device');
 
 const APP_NAME = 'Nothing X Mac';
@@ -120,7 +121,14 @@ app.whenReady().then(() => {
   createPopover();
   device.start();
 
-  tray = new Tray(trayIcon());
+  // App logo in the menu bar; falls back to the SF earbuds glyph if the logo can't load.
+  let icon = null;
+  try {
+    icon = trayLogoIcon();
+  } catch (err) {
+    console.error('[tray] logo failed, using earbuds icon:', err.message);
+  }
+  tray = new Tray(icon && !icon.isEmpty() ? icon : trayIcon());
   tray.setToolTip(APP_NAME);
   tray.on('click', togglePopover);
   tray.on('right-click', () => {

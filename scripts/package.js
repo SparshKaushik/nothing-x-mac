@@ -1,7 +1,9 @@
 // Builds dist/Nothing X Mac-darwin-<arch>/Nothing X Mac.app
 //
-//   npm run dist           build the app
+//   npm run dist           build the app for this Mac's chip
 //   npm run install-app    build it and copy it to /Applications
+//   npm run release        universal build (Apple Silicon + Intel) + DMG/zip
+//                          (passes --universal; see scripts/release.js)
 //
 // The app is ad-hoc signed so it runs on this Mac (Apple Silicon refuses
 // unsigned apps). It isn't notarized, so it's meant for your own machine, not
@@ -13,6 +15,7 @@ const { packager } = require('@electron/packager');
 
 const ROOT = path.join(__dirname, '..');
 const APP_NAME = 'Nothing X Mac';
+const UNIVERSAL = process.argv.includes('--universal');
 
 function codesign(target, extra = []) {
   execFileSync('codesign', ['--force', '--sign', '-', ...extra, target], { stdio: 'inherit' });
@@ -23,7 +26,10 @@ async function main() {
     dir: ROOT,
     name: APP_NAME,
     platform: 'darwin',
-    arch: process.arch,
+    arch: UNIVERSAL ? 'universal' : process.arch,
+    // The Swift helper is already a universal binary (npm run build:native:universal),
+    // so it's identical in both halves; tell the merger not to lipo it again.
+    ...(UNIVERSAL ? { osxUniversal: { x64ArchFiles: '**/nx-bridge', mergeASARs: true } } : {}),
     out: path.join(ROOT, 'dist'),
     overwrite: true,
     asar: true,

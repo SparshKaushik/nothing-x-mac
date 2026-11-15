@@ -40,9 +40,13 @@ NXM_DEBUG=1 npm start
 ```bash
 npm run dist          # builds dist/Nothing X Mac-darwin-<arch>/Nothing X Mac.app
 npm run install-app   # builds and copies it to /Applications
+npm run release       # universal app (Apple Silicon + Intel) -> release/v<version>/ DMG, zip, checksums
+npm run build:icon    # regenerate packaging/icon.icns from src/assets/logo.svg
 ```
 
-The app is ad-hoc signed for this Mac only (not notarized).
+Builds are ad-hoc signed, not notarized: on other Macs, users open it once via System Settings → Privacy & Security → Open Anyway.
+
+Unofficial project, not affiliated with or endorsed by Nothing Technology Limited.
 
 ## Layout
 

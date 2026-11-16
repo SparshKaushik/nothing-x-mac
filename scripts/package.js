@@ -42,7 +42,7 @@ async function main() {
     extraResource: [path.join(ROOT, 'build', 'nx-bridge')],
     // Only ship what the app needs at runtime.
     ignore: [
-      /^\/(build|dist|native|packaging|scripts)(\/|$)/,
+      /^\/(build|dist|docs|native|packaging|release|scripts)(\/|$)/,
       /^\/\.git(\/|$)/,
       /^\/\.gitignore$/,
       /^\/README\.md$/,

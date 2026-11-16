@@ -18,6 +18,18 @@
   Made by <a href="https://yashraut.me"><b>Yash Raut</b></a> · open to new roles
 </p>
 
+<p align="center">
+  <a href="https://buymeacoffee.com/yashraut362"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee" height="32"></a>
+</p>
+
+<p align="center">
+  <a href="docs/media/demo.mp4">
+    <img src="docs/media/demo.gif" width="860" alt="Nothing X Mac demo: battery, noise control, bass, equalizer, quick settings, dual connection and gestures">
+  </a>
+  <br>
+  <sub>▶︎ <a href="docs/media/demo.mp4">Watch the full demo with sound</a> (38 s)</sub>
+</p>
+
 ---
 
 Nothing's companion app, Nothing X, only exists for phones. On a Mac, your
@@ -116,6 +128,11 @@ end, from Bluetooth protocols to UI design.
 
 **I'm currently looking for my next role.** If you're hiring, or this project
 was useful to you, I'd love to hear from you: **[yashraut.me](https://yashraut.me)**.
+
+If Nothing X Mac saves you reaching for your phone, you can
+[buy me a coffee](https://buymeacoffee.com/yashraut362) ☕. It keeps the updates coming.
+
+<a href="https://buymeacoffee.com/yashraut362"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee" height="32"></a>
 
 ## Credits
 

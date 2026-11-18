@@ -30,6 +30,10 @@
   <sub>▶︎ <a href="docs/media/demo.mp4">Watch the full demo with sound</a> (38 s)</sub>
 </p>
 
+<p align="center">
+  <sub>See the <a href="https://x.com/getpeid/status/2122427176977047884">post on X by @getpeid</a></sub>
+</p>
+
 ---
 
 Nothing's companion app, Nothing X, only exists for phones. On a Mac, your

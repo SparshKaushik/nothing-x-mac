@@ -31,7 +31,9 @@
 </p>
 
 <p align="center">
-  <sub>See the <a href="https://x.com/getpeid/status/2122427176977047884">post on X by @getpeid</a></sub>
+  <a href="https://x.com/getpeid/status/2122427176977047884">
+    <img src="docs/media/getpeid-post.png" width="560" alt="Carl Pei (@getpeid) on X: Cool, was thinking of building this myself!">
+  </a>
 </p>
 
 ---

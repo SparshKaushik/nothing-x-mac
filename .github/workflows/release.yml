@@ -1,0 +1,43 @@
+name: Build and release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Universal (arm64 + x86_64) app, ad-hoc signed -> release/v<version>/ DMG, zip, SHA256SUMS.txt
+      - run: npm run release
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            TAG="$GITHUB_REF_NAME"
+          else
+            TAG="v${VERSION}-build.${GITHUB_RUN_NUMBER}"
+          fi
+          DIR="release/v${VERSION}"
+          NOTES=$(printf 'Automated build of `%s` (%s).\n\nUniversal app (Apple Silicon + Intel), ad-hoc signed, not notarized.\nFirst launch: System Settings → Privacy & Security → Open Anyway, or\n`xattr -dr com.apple.quarantine "/Applications/Nothing X Mac.app"`.\n\n### SHA-256\n```\n%s\n```\n' "$GITHUB_SHA" "$TAG" "$(cat "$DIR/SHA256SUMS.txt")")
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$DIR"/* --clobber
+          else
+            gh release create "$TAG" "$DIR"/* --target "$GITHUB_SHA" --title "Nothing X Mac $TAG" --notes "$NOTES"
+          fi
